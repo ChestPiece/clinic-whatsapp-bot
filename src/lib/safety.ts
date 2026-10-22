@@ -21,3 +21,9 @@ export const emergencyReply = (text: string, clinicPhone: string | null) =>
   /[؀-ۿ]/.test(text)
     ? `إذا كانت حالة طارئة، اتصل بالإسعاف على 998 فوراً أو توجه إلى أقرب قسم طوارئ.${clinicPhone ? ` هاتف العيادة: ${clinicPhone}` : ""}`
     : `If this is an emergency, call 998 (ambulance) now or go to the nearest emergency department.${clinicPhone ? ` Clinic phone: ${clinicPhone}` : ""}`;
+
+// Opt-out from follow-up, recall and waitlist messages. Whole message only. Not "الغاء": in Arabic that means "cancel" (an appointment).
+export const isStop = (text: string) => /^\s*(stop|unsubscribe|توقف|إيقاف|ايقاف)\s*[.!]?\s*$/i.test(text);
+
+export const stopReply =
+  "Done, you won't get follow-up messages from us. Reminders for booked visits still come, and you can message here any time.\nتم، لن نرسل لك رسائل متابعة. ستصلك تذكيرات المواعيد المحجوزة فقط، ويمكنك مراسلتنا هنا في أي وقت.";

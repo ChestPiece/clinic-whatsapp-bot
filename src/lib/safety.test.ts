@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { emergencyReply, isEmergency } from "./safety";
+import { emergencyReply, isEmergency, isStop } from "./safety";
 
 test("flags life-threatening messages in English and Arabic", () => {
   for (const t of [
@@ -40,4 +40,9 @@ test("heavy bleeding and spreading swelling are emergencies, Arabizi too", () =>
 test("an accident in the past is not an emergency", () => {
   for (const t of ["I had an accident last year and my crown fell off, can I book?", "accident 2 years ago, need a check-up"])
     expect(isEmergency(t), t).toBe(false);
+});
+
+test("STOP opts out of follow-ups, but the Arabic word for cancel does not", () => {
+  for (const t of ["STOP", "stop", " Stop ", "توقف", "unsubscribe"]) expect(isStop(t), t).toBe(true);
+  for (const t of ["الغاء", "stop sending me the wrong time", "cancel"]) expect(isStop(t), t).toBe(false);
 });

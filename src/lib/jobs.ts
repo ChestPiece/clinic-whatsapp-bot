@@ -1,7 +1,8 @@
 // Outbound jobs run by POST /api/cron every 15 min (pg_cron + pg_net). Today: 24h and 2h visit reminders.
 import { assistant, type AgentInputItem } from "@openai/agents";
-import { loadClinic, trimHistory } from "./agent";
+import { loadClinic, slotsOn, stillPaused, trimHistory } from "./agent";
 import { db } from "./db";
+import { localDate, toUtc } from "./slots";
 import { sendText } from "./whatsapp";
 
 const HOUR = 3_600_000;
@@ -38,6 +39,46 @@ const when = (d: Date, offsetMin: number, locale: string) =>
     minute: "2-digit",
   });
 
+type Chat = { lastAt: string; sentAt: string | null; optedOut: boolean; paused: boolean; upcoming: number };
+
+// One nudge per quiet inquiry: the patient wrote 3 to 20 h ago, has nothing booked, and was not nudged since.
+export const followupDue = (c: Chat, now: Date) => {
+  const quiet = now.getTime() - Date.parse(c.lastAt);
+  return (
+    quiet >= 3 * HOUR &&
+    quiet <= 20 * HOUR &&
+    !c.upcoming &&
+    !c.optedOut &&
+    !c.paused &&
+    (!c.sentAt || Date.parse(c.sentAt) < Date.parse(c.lastAt))
+  );
+};
+
+// ponytail: the service the chat mentioned last, by plain name match. Arabic service names are not matched yet.
+export function guessService(historyJson: string, services: string[]) {
+  const text = historyJson.toLowerCase();
+  let best: { name: string; at: number } | null = null;
+  for (const name of services) {
+    const at = text.lastIndexOf(name.toLowerCase());
+    if (at >= 0 && (!best || at > best.at)) best = { name, at };
+  }
+  return best?.name ?? null;
+}
+
+export function followupText(f: { name: string | null; service: string | null; slot: string | null; clinic: string }) {
+  const first = f.name?.trim().split(/\s+/)[0];
+  const hi = `Hi${first ? ` ${first}` : ""}, it's Sara from ${f.clinic}.`;
+  const en = f.service
+    ? `${hi} Still keen on a ${f.service}?${f.slot ? ` I have ${f.slot} free, shall I book it for you?` : " I can find you a time."}`
+    : `${hi} Just checking in, can I help you book a visit?${f.slot ? ` I have ${f.slot} free.` : ""}`;
+  const ar = `مرحباً${first ? ` ${first}` : ""}، معك سارة من ${f.clinic}. هل ما زلت ترغب بحجز موعد${f.service ? ` (${f.service})` : ""}؟${f.slot ? ` لدي موعد متاح ${f.slot}.` : ""}`;
+  return `${en}\n${ar}\n(Reply STOP to stop these messages. أرسل توقف لإيقافها.)`;
+}
+
+// The weekly report credits a booking to the follow-up if it came within 48 h of the nudge.
+export const bookingSource = (followupSentAt: string | null, now: Date) =>
+  followupSentAt && now.getTime() - Date.parse(followupSentAt) <= 48 * HOUR ? "followup" : "chat";
+
 // Bilingual, like the other fixed replies: the patient's language is not stored.
 export function reminderText(r: { name: string | null; service: string; startsAt: Date; clinic: string; offsetMin: number }) {
   const first = r.name?.trim().split(/\s+/)[0];
@@ -45,9 +86,29 @@ export function reminderText(r: { name: string | null; service: string; startsAt
 مرحباً${first ? ` ${first}` : ""}، تذكير بموعدك (${r.service}) في ${r.clinic} يوم ${when(r.startsAt, r.offsetMin, "ar-AE")}. أرسل 1 للتأكيد أو 2 لتغيير الموعد.`;
 }
 
-export async function runJobs(now = new Date()) {
-  const clinic = await loadClinic();
-  if (quietHours(now, clinic.utc_offset_minutes)) return { reminders: 0, quiet: true };
+// In the chat history, so the agent understands the patient's reply to an outbound message.
+async function appendToChat(patientId: string, text: string) {
+  const sb = db();
+  const { data } = await sb.from("conversations").select("history").eq("patient_id", patientId).maybeSingle();
+  const history = (data?.history ?? []) as AgentInputItem[];
+  const { error } = await sb.from("conversations").upsert({ patient_id: patientId, history: trimHistory([...history, assistant(text)]) }); // updated_at untouched: it times a staff pause
+  if (error) console.error("[outbound history]", error.message);
+}
+
+async function send(to: string, text: string, patientId: string, kind: string) {
+  try {
+    await sendText(to, text);
+  } catch (e) {
+    console.error(`[${kind}]`, (e as Error).message);
+    return false;
+  }
+  await appendToChat(patientId, text);
+  return true;
+}
+
+type Clinic = Awaited<ReturnType<typeof loadClinic>>;
+
+async function sendReminders(clinic: Clinic, now: Date, budget: number) {
   const sb = db();
   const { data, error } = await sb
     .from("appointments")
@@ -61,7 +122,7 @@ export async function runJobs(now = new Date()) {
 
   let sent = 0;
   for (const v of data) {
-    if (sent >= MAX_SENDS) break;
+    if (sent >= budget) break;
     const kind = reminderDue(v, now);
     if (!kind) continue;
     const column = kind === "24h" ? "reminded_24h_at" : "reminded_2h_at";
@@ -76,20 +137,70 @@ export async function runJobs(now = new Date()) {
     if (!claimed.length) continue;
     const patient = v.patients as unknown as { wa_id: string; name: string | null };
     const text = reminderText({ name: patient.name, service: v.service, startsAt: new Date(v.starts_at), clinic: clinic.name, offsetMin: clinic.utc_offset_minutes });
-    try {
-      await sendText(patient.wa_id, text);
-      sent++;
-    } catch (e) {
-      console.error("[reminder]", (e as Error).message);
-      continue;
-    }
-    // In the chat history, so the agent understands a "1" or "2" reply.
-    const { data: convo } = await sb.from("conversations").select("history").eq("patient_id", v.patient_id).maybeSingle();
-    const history = (convo?.history ?? []) as AgentInputItem[];
-    const { error: historyError } = await sb
-      .from("conversations")
-      .upsert({ patient_id: v.patient_id, history: trimHistory([...history, assistant(text)]) }); // updated_at untouched: it times a staff pause
-    if (historyError) console.error("[reminder history]", historyError.message);
+    if (await send(patient.wa_id, text, v.patient_id, "reminder")) sent++;
   }
-  return { reminders: sent, quiet: false };
+  return sent;
+}
+
+// The first free time in the next week for a service, as "Fri, Oct 23, 4:00 PM".
+async function nextFree(clinic: Clinic, serviceName: string, now: Date) {
+  const service = clinic.services.find((s) => s.name === serviceName);
+  if (!service) return null;
+  for (let d = 0; d < 7; d++) {
+    const date = localDate(new Date(now.getTime() + d * 24 * HOUR), clinic.utc_offset_minutes);
+    const [time] = await slotsOn(clinic, service, date);
+    if (time) return when(toUtc(date, time, clinic.utc_offset_minutes), clinic.utc_offset_minutes, "en-US");
+  }
+  return null;
+}
+
+async function sendFollowups(clinic: Clinic, now: Date, budget: number) {
+  const sb = db();
+  // The patient's last message time per chat, from the stored pieces (emergency and STOP messages carry no body).
+  const { data: pieces, error } = await sb
+    .from("processed_messages")
+    .select("patient_wa, created_at")
+    .not("body", "is", null)
+    .not("patient_wa", "is", null)
+    .gt("created_at", new Date(now.getTime() - 20 * HOUR).toISOString());
+  if (error) throw error;
+  const last = new Map<string, string>();
+  for (const p of pieces) if (!last.has(p.patient_wa) || p.created_at > last.get(p.patient_wa)!) last.set(p.patient_wa, p.created_at);
+
+  let sent = 0;
+  for (const [wa, lastAt] of last) {
+    if (sent >= budget) break;
+    if (now.getTime() - Date.parse(lastAt) < 3 * HOUR) continue;
+    const { data: patient } = await sb.from("patients").select("id, name, opted_out").eq("clinic_id", clinic.id).eq("wa_id", wa).maybeSingle();
+    if (!patient) continue;
+    const [{ data: convo }, { count }] = await Promise.all([
+      sb.from("conversations").select("history, bot_paused, updated_at, followup_sent_at").eq("patient_id", patient.id).maybeSingle(),
+      sb.from("appointments").select("id", { count: "exact", head: true }).eq("patient_id", patient.id).eq("status", "booked").gt("starts_at", now.toISOString()),
+    ]);
+    if (!convo) continue;
+    const chat = { lastAt, sentAt: convo.followup_sent_at, optedOut: patient.opted_out, paused: stillPaused(convo, now), upcoming: count ?? 0 };
+    if (!followupDue(chat, now)) continue;
+    // Claim before sending (at most once per quiet inquiry).
+    const { data: claimed, error: claimError } = await sb
+      .from("conversations")
+      .update({ followup_sent_at: now.toISOString() })
+      .eq("patient_id", patient.id)
+      .or(`followup_sent_at.is.null,followup_sent_at.lt.${lastAt}`)
+      .select("patient_id");
+    if (claimError) throw claimError;
+    if (!claimed.length) continue;
+    const service = guessService(JSON.stringify(convo.history), clinic.services.map((s) => s.name));
+    const slot = await nextFree(clinic, service ?? clinic.services[0]?.name, now);
+    const text = followupText({ name: patient.name, service, slot, clinic: clinic.name });
+    if (await send(wa, text, patient.id, "followup")) sent++;
+  }
+  return sent;
+}
+
+export async function runJobs(now = new Date()) {
+  const clinic = await loadClinic();
+  if (quietHours(now, clinic.utc_offset_minutes)) return { reminders: 0, followups: 0, quiet: true };
+  const reminders = await sendReminders(clinic, now, MAX_SENDS);
+  const followups = await sendFollowups(clinic, now, MAX_SENDS - reminders);
+  return { reminders, followups, quiet: false };
 }

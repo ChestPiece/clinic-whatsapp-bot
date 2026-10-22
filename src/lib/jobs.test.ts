@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { quietHours, reminderDue, reminderText } from "./jobs";
+import { bookingSource, followupDue, followupText, guessService, quietHours, reminderDue, reminderText } from "./jobs";
 
 const DUBAI = 240;
 
@@ -38,4 +38,38 @@ test("reminder text is bilingual, names the visit and asks for 1 or 2", () => {
   expect(text).toContain("Reply 1 to confirm or 2 to change it");
   expect(text).toMatch(/[؀-ۿ]/); // Arabic part
   expect(reminderText({ name: null, service: "Check-up", startsAt: new Date(), clinic: "X", offsetMin: DUBAI })).toMatch(/^Hi,/);
+});
+
+test("one follow-up for a chat that went quiet 3 to 20 hours ago without a booking", () => {
+  const now = new Date("2026-10-22T10:00:00Z");
+  const ago = (h: number) => new Date(now.getTime() - h * 3_600_000).toISOString();
+  const chat = { lastAt: ago(4), sentAt: null as string | null, optedOut: false, paused: false, upcoming: 0 };
+  expect(followupDue(chat, now)).toBe(true);
+  expect(followupDue({ ...chat, lastAt: ago(2) }, now)).toBe(false); // still fresh
+  expect(followupDue({ ...chat, lastAt: ago(21) }, now)).toBe(false); // too old to nudge
+  expect(followupDue({ ...chat, upcoming: 1 }, now)).toBe(false); // booked
+  expect(followupDue({ ...chat, optedOut: true }, now)).toBe(false);
+  expect(followupDue({ ...chat, paused: true }, now)).toBe(false); // staff own the chat
+  expect(followupDue({ ...chat, sentAt: ago(3) }, now)).toBe(false); // already nudged after this message
+  expect(followupDue({ ...chat, sentAt: ago(48) }, now)).toBe(true); // a new inquiry after an old nudge
+});
+
+test("the follow-up names the service asked about and offers one time", () => {
+  const services = ["Check-up", "Teeth whitening", "Filling"];
+  expect(guessService('[{"content":"how much is teeth whitening?"},{"content":"and a filling"}]', services)).toBe("Filling");
+  expect(guessService('[{"content":"hi"}]', services)).toBe(null);
+  const text = followupText({ name: "Anas Altaf", service: "Teeth whitening", slot: "Fri, Oct 23, 4:00 PM", clinic: "Sample Smile Dental" });
+  expect(text).toContain("Hi Anas");
+  expect(text).toContain("Teeth whitening");
+  expect(text).toContain("Fri, Oct 23, 4:00 PM");
+  expect(text).toContain("STOP");
+  expect(text).toMatch(/[؀-ۿ]/);
+  expect(followupText({ name: null, service: null, slot: null, clinic: "X" })).not.toContain("null");
+});
+
+test("a booking within 48 hours of a follow-up counts as won by the follow-up", () => {
+  const now = new Date("2026-10-22T10:00:00Z");
+  expect(bookingSource("2026-10-21T12:00:00Z", now)).toBe("followup");
+  expect(bookingSource("2026-10-19T12:00:00Z", now)).toBe("chat");
+  expect(bookingSource(null, now)).toBe("chat");
 });

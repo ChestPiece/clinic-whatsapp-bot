@@ -2,11 +2,12 @@
 import { Agent, assistant, run, tool, user, type AgentInputItem, type RunContext, type RunItem } from "@openai/agents";
 import { z } from "zod";
 import { db } from "./db";
-import { emergencyReply, isEmergency } from "./safety";
+import { emergencyReply, isEmergency, isStop, stopReply } from "./safety";
 import { DAYS, freeSlots, localDate, localTime, spreadSlots, toUtc, type Hours } from "./slots";
+import { bookingSource } from "./jobs";
 import { markRead, sendText, type IncomingMessage } from "./whatsapp";
 
-type Service = { name: string; name_ar: string; minutes: number; price_aed: number };
+export type Service = { name: string; name_ar: string; minutes: number; price_aed: number };
 type Clinic = {
   id: string;
   name: string;
@@ -43,7 +44,7 @@ async function bookedOn(c: Clinic, date: string, ignoreId?: string) {
   return data.filter((a) => a.id !== ignoreId).map((a) => ({ start: new Date(a.starts_at), end: new Date(a.ends_at) }));
 }
 
-async function slotsOn(c: Clinic, service: Service, date: string, ignoreId?: string) {
+export async function slotsOn(c: Clinic, service: Service, date: string, ignoreId?: string) {
   return freeSlots(c.hours, await bookedOn(c, date, ignoreId), service.minutes, date, new Date(), c.utc_offset_minutes);
 }
 
@@ -117,9 +118,10 @@ const book = tool({
     if (typeof slot === "string") return slot;
     // Keep the name on file: a later booking "for my son" must not rename the account holder.
     if (patient_name && !patientName) await db().from("patients").update({ name: patient_name }).eq("id", patientId);
+    const { data: convo } = await db().from("conversations").select("followup_sent_at").eq("patient_id", patientId).maybeSingle();
     const { data, error } = await db()
       .from("appointments")
-      .insert({ clinic_id: clinic.id, patient_id: patientId, service: slot.service.name, starts_at: slot.starts_at, ends_at: slot.ends_at })
+      .insert({ clinic_id: clinic.id, patient_id: patientId, service: slot.service.name, starts_at: slot.starts_at, ends_at: slot.ends_at, source: bookingSource(convo?.followup_sent_at ?? null, new Date()) })
       .select("id")
       .single();
     if (error?.code === "23P01") return TAKEN;
@@ -437,6 +439,16 @@ export async function handleMessage(msg: IncomingMessage) {
       await answered();
       const { history } = await loadHistory();
       await sb.from("conversations").upsert({ patient_id: patient.id, history: trimHistory([...history, user(own), assistant(reply)]), updated_at: new Date().toISOString() });
+      return;
+    }
+    // Opt-out is deterministic too: no follow-up, recall or waitlist messages after this. Reminders for booked visits continue.
+    if (isStop(own)) {
+      const { error } = await sb.from("patients").update({ opted_out: true }).eq("id", patient.id);
+      if (error) throw error;
+      await sendText(msg.from, stopReply);
+      await answered();
+      const { history } = await loadHistory();
+      await sb.from("conversations").upsert({ patient_id: patient.id, history: trimHistory([...history, user(own), assistant(stopReply)]) });
       return;
     }
 
