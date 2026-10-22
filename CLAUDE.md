@@ -45,6 +45,11 @@ npm run lint
 6. Paused chat (`stillPaused`): staff own it; the patient's messages are still saved to history; the pause lapses after 30 min.
 7. Run the agent, send `tidy(reply)` (no en/em dashes), log `[timing]`, then append this run's turns to the latest saved history (`mergeHistory`) and keep the last 10 turns.
 
+## Outbound jobs (`src/lib/jobs.ts`, `POST /api/cron?secret=CRON_SECRET`)
+- pg_cron + pg_net call the cron route every 15 min. The schedule SQL is at the bottom of `0003_revenue.sql`.
+- Reminders: 24h and 2h before a booked visit, in English and Arabic, with "Reply 1 to confirm or 2 to change it". A visit gets no reminder for a window it was booked inside. Each reminder is claimed (`reminded_*_at`) before it is sent, so it goes out at most once. The reminder text is appended to the chat history, so the agent understands the "1" or "2" reply (`confirm_visit` tool; a reschedule clears `confirmed_at`).
+- Outbound limits: no messages between 21:00 and 09:00 clinic time, and at most 20 per run.
+
 Booking limits: at most 3 upcoming visits per patient, and dates up to 60 days ahead. A stored patient name is never overwritten by a later booking.
 Errors: the SORRY reply promises a staff reply only when `STAFF_WHATSAPP` is set; otherwise it gives the clinic phone.
 

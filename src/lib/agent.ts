@@ -163,12 +163,25 @@ const reschedule = tool({
     if (typeof slot === "string") return slot;
     const { error } = await db()
       .from("appointments")
-      .update({ starts_at: slot.starts_at, ends_at: slot.ends_at, reminded_24h_at: null, reminded_2h_at: null })
+      .update({ starts_at: slot.starts_at, ends_at: slot.ends_at, reminded_24h_at: null, reminded_2h_at: null, confirmed_at: null })
       .eq("id", appointment_id)
       .eq("patient_id", ctx.patientId);
     if (error?.code === "23P01") return TAKEN;
     if (error) throw error;
     return `Moved to ${date} at ${time}.`;
+  },
+});
+
+const confirmVisit = tool({
+  name: "confirm_visit",
+  description: "Mark one of this patient's upcoming appointments as confirmed (the patient answered a reminder with 1 or yes).",
+  parameters: z.object({ appointment_id: z.string().describe("id from my_appointments") }),
+  async execute({ appointment_id }, rc: Rc) {
+    const ctx = rc!.context;
+    if (!(await upcoming(ctx)).some((a) => a.id === appointment_id)) return "No such upcoming appointment. Call my_appointments.";
+    const { error } = await db().from("appointments").update({ confirmed_at: new Date().toISOString() }).eq("id", appointment_id).eq("patient_id", ctx.patientId);
+    if (error) throw error;
+    return "Confirmed.";
   },
 });
 
@@ -216,6 +229,7 @@ Booking
 - After booking: a short confirmation with the date, time and address, and that they can message here to change it.
 - Reschedule or cancel: call my_appointments first. Before cancelling, confirm and offer once to move it instead. After cancelling, keep it short and kind.
 - For pain or a broken tooth, be kind and offer the earliest "Toothache visit".
+- Reminders: the clinic sends "Reply 1 to confirm or 2 to change it". A reply of 1, yes, ok or تمام: call my_appointments, then confirm_visit, then thank them in one short line. A reply of 2: ask which day suits them and reschedule as usual. If they cannot come at all, offer to move it before cancelling.
 
 What you handle, like a real front desk
 - Only this clinic: appointments, services, prices, hours, location, parking, payment, insurers and the FAQ below.
@@ -242,7 +256,7 @@ ${JSON.stringify(info)}`;
 const receptionist = new Agent<Ctx>({
   name: "Receptionist",
   instructions,
-  tools: [findSlots, book, myAppointments, cancel, reschedule, handoff],
+  tools: [findSlots, book, myAppointments, cancel, reschedule, confirmVisit, handoff],
 }); // Model: SDK default; override with OPENAI_DEFAULT_MODEL.
 
 // ponytail: keep the last 10 patient turns, cut at a user message so no tool call loses its output. Summarize if long chats matter.
@@ -357,13 +371,13 @@ const slowDown = (phone: string | null) =>
   `You're sending messages very fast, so I'll pause for a few minutes.${phone ? ` For anything urgent, call the clinic on ${phone}.` : ""}\nأنت ترسل رسائل كثيرة بسرعة، سأتوقف لبضع دقائق.${phone ? ` للأمور العاجلة اتصل بالعيادة على ${phone}.` : ""}`;
 
 // Tools that change data. A run that used one must still send its reply, even if a newer message arrived meanwhile.
-const WRITES = new Set(["book", "cancel", "reschedule", "handoff_to_staff"]);
+const WRITES = new Set(["book", "cancel", "reschedule", "confirm_visit", "handoff_to_staff"]);
 export const wroteData = (items: RunItem[]) =>
   items.some((i) => i.type === "tool_call_item" && "name" in i.rawItem && WRITES.has(i.rawItem.name));
 
 // ponytail: clinic row cached per server process for 5 min, so clinic edits in Supabase show up within 5 min.
 let clinicCache: { clinic: Clinic; at: number } | null = null;
-async function loadClinic(): Promise<Clinic> {
+export async function loadClinic(): Promise<Clinic> {
   if (clinicCache && Date.now() - clinicCache.at < 300_000) return clinicCache.clinic;
   const { data, error } = await db().from("clinics").select("*").eq("id", process.env.CLINIC_ID).single();
   if (error) throw error;
