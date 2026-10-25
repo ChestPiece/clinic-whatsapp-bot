@@ -80,8 +80,9 @@ Handoff pauses a chat only when the clinic's `staff_whatsapp` is set; without it
 - Break-test and hardening on 2026-10-22 (`0002_hardening.sql`): rate limit, input caps, voice URL guard, booking caps, wider EN/AR/Arabizi emergency regex without the "accident last year" false alarm, DB debounce for Vercel, history merge, paused-chat history, honest error reply.
 - 2026-10-22: `0002_hardening.sql` applied, replays re-verified, deployed to Vercel (R0, R1).
 - 2026-10-22: R2 reminders + confirm and R3 follow-up + STOP are live (`0003_revenue.sql` applied, cron scheduled).
-- 2026-10-25: P0 multi-tenant foundation coded (`0004_tenants.sql`, not yet applied). Needs Anas to paste 0004 plus its backfill block before the next deploy.
+- 2026-10-25: P0 multi-tenant foundation done (`0004_tenants.sql` applied with its backfill block, deployed in 7d410b3).
 - 2026-10-25: web chat first cut coded (`/chat/sample-smile`). 0004 now also adds `patients.web_visitor_id` and `phone`.
+- 2026-10-25: landing page and web chat redesigned ("Stone & Sage": Manrope + Readex Pro, stone background with sage/sand washes, full-screen chat with a clinic info sidebar). Tokens and rules in `.tastemaker/style-lock.md`. Deployed in 7d410b3.
 - **Demo freeze (2026-10-22):** the owner judged the current bot enough to demo to leads and gather feedback. R4 onward is on hold until lead feedback comes in.
 - On hold:
   - R4 waitlist + recall (`0003` already has the recall columns and `appointments.source`).

@@ -1,0 +1,182 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]: "OPTION A · CLINIC WHITE · Inter Tight + Inter · teal #0F766E"
+  - generic [ref=f2e3]:
+    - generic [ref=f2e5]:
+      - generic [ref=f2e6]: Front Desk
+      - navigation [ref=f2e11]:
+        - link "How it works" [ref=f2e12] [cursor=pointer]:
+          - /url: "#"
+        - link "Safety" [ref=f2e13] [cursor=pointer]:
+          - /url: "#"
+        - link "For clinics" [ref=f2e14] [cursor=pointer]:
+          - /url: "#"
+      - link "Try the demo" [ref=f2e15] [cursor=pointer]:
+        - /url: "#"
+    - generic [ref=f2e16]:
+      - generic [ref=f2e17]:
+        - generic [ref=f2e18]: Answering patients on WhatsApp and web
+        - heading "Every patient message answered. Even at 2 a.m." [level=1] [ref=f2e20]
+        - paragraph [ref=f2e21]: An AI receptionist for dental clinics. It books, moves and cancels visits on WhatsApp and your website, in English and Arabic.
+        - generic [ref=f2e22]:
+          - link "Try the demo chat →" [ref=f2e23] [cursor=pointer]:
+            - /url: "#"
+            - text: Try the demo chat
+            - generic [ref=f2e24]: →
+          - link "See how a booking runs" [ref=f2e25] [cursor=pointer]:
+            - /url: "#"
+        - generic [ref=f2e26]:
+          - generic [ref=f2e27]:
+            - term [ref=f2e28]: Channels
+            - definition [ref=f2e29]: WhatsApp · Web
+          - generic [ref=f2e30]:
+            - term [ref=f2e31]: Languages
+            - definition [ref=f2e32]: EN · عربي
+          - generic [ref=f2e33]:
+            - term [ref=f2e34]: Emergencies
+            - definition [ref=f2e35]: 998 first
+      - figure "Sample conversation · sample clinic" [ref=f2e36]:
+        - generic [ref=f2e37]:
+          - generic [ref=f2e38]:
+            - generic [ref=f2e39]: S
+            - generic [ref=f2e40]:
+              - generic [ref=f2e41]: Sample Smile Dental
+              - generic [ref=f2e42]: Sara · virtual receptionist
+            - generic [ref=f2e43]: 23:40
+          - generic [ref=f2e44]:
+            - generic [ref=f2e45]: Hi, can I book a cleaning this week? Evenings are best
+            - generic [ref=f2e46]: "Of course. These evening times are free on Thursday:"
+            - generic [ref=f2e47]:
+              - generic [ref=f2e48]: Thu 29 Oct · Scaling & polishing
+              - generic [ref=f2e49]:
+                - generic [ref=f2e50]: 5:00 pm
+                - generic [ref=f2e51]: ✓ 6:30 pm
+                - generic [ref=f2e52]: 7:15 pm
+            - generic [ref=f2e53]:
+              - generic [ref=f2e54]:
+                - generic [ref=f2e55]: ✓
+                - text: Appointment booked
+              - generic [ref=f2e56]:
+                - generic [ref=f2e57]: When
+                - generic [ref=f2e58]: Thu 29 Oct · 6:30 pm
+                - generic [ref=f2e59]: Where
+                - generic [ref=f2e60]: Al Barsha, Dubai
+  - generic [ref=f2e66]:
+    - paragraph [ref=f2e67]: Web chat · full-screen app · 1280px
+    - generic [ref=f2e69]:
+      - generic [ref=f2e70]:
+        - generic [ref=f2e71]:
+          - generic [ref=f2e72]: S
+          - generic [ref=f2e73]:
+            - generic [ref=f2e74]:
+              - text: Sample Smile Dental
+              - generic [ref=f2e75]: Sample
+            - generic [ref=f2e76]: Sara · usually replies in seconds
+          - button "Call clinic" [ref=f2e78] [cursor=pointer]
+        - generic [ref=f2e80]:
+          - generic [ref=f2e81]:
+            - generic [ref=f2e82]: S
+            - paragraph [ref=f2e83]: Hi, I'm Sara from Sample Smile Dental. I can book, move or cancel a visit, and answer questions about prices, hours and location.
+          - generic [ref=f2e84]: Can I book a cleaning on Thursday evening?
+          - generic [ref=f2e85]:
+            - generic [ref=f2e86]: S
+            - generic [ref=f2e87]:
+              - paragraph [ref=f2e88]: "Sure. Scaling & polishing takes 45 minutes. Pick a time on Thursday:"
+              - generic [ref=f2e89]:
+                - generic [ref=f2e90]: Thu 29 Oct
+                - generic [ref=f2e91]:
+                  - button "5:00 pm" [ref=f2e92] [cursor=pointer]
+                  - button "6:30 pm" [ref=f2e93] [cursor=pointer]
+                  - button "7:15 pm" [ref=f2e94] [cursor=pointer]
+                  - button "8:00 pm" [ref=f2e95] [cursor=pointer]
+        - generic [ref=f2e97]:
+          - generic [ref=f2e98]:
+            - generic [ref=f2e99]: How much is a cleaning?
+            - generic [ref=f2e100]: Where are you?
+            - generic [ref=f2e101]: أبغى أحجز موعد
+          - generic [ref=f2e102]:
+            - textbox "Message Sara…" [ref=f2e103]
+            - button "Send" [ref=f2e104] [cursor=pointer]: ↑
+          - paragraph [ref=f2e105]: Sara is a virtual assistant. For emergencies call 998.
+      - complementary [ref=f2e106]:
+        - generic [ref=f2e107]: Clinic
+        - paragraph [ref=f2e108]: Al Barsha, Dubai
+        - link "Open in Maps" [ref=f2e109] [cursor=pointer]:
+          - /url: "#"
+        - generic [ref=f2e110]: Hours
+        - generic [ref=f2e111]:
+          - term [ref=f2e112]: Sat – Thu
+          - definition [ref=f2e113]: 09:00 – 21:00
+          - term [ref=f2e114]: Fri
+          - definition [ref=f2e115]: Closed
+        - generic [ref=f2e116]: Services
+        - list [ref=f2e117]:
+          - listitem [ref=f2e118]:
+            - generic [ref=f2e119]: Check-up
+            - generic [ref=f2e120]: 150 AED
+          - listitem [ref=f2e121]:
+            - generic [ref=f2e122]: Scaling & polishing
+            - generic [ref=f2e123]: 300 AED
+          - listitem [ref=f2e124]:
+            - generic [ref=f2e125]: Filling
+            - generic [ref=f2e126]: 350 AED
+          - listitem [ref=f2e127]:
+            - generic [ref=f2e128]: Whitening
+            - generic [ref=f2e129]: 1,200 AED
+        - paragraph [ref=f2e130]: Sample clinic. Prices are made up.
+  - generic [ref=f2e132]:
+    - generic [ref=f2e133]:
+      - paragraph [ref=f2e134]: Mobile · 360px
+      - generic [ref=f2e135]:
+        - generic [ref=f2e136]:
+          - generic [ref=f2e137]: S
+          - generic [ref=f2e138]: Sample Smile Dental
+          - generic [ref=f2e139]: Call
+        - generic [ref=f2e140]:
+          - paragraph [ref=f2e141]: Hi, I'm Sara. How can I help?
+          - generic [ref=f2e142]: أبغى أحجز تنظيف يوم الخميس
+          - paragraph [ref=f2e143]: "أكيد! هذي الأوقات المتاحة يوم الخميس:"
+          - generic [ref=f2e144]:
+            - generic [ref=f2e145]: 5:00
+            - generic [ref=f2e146]: 6:30
+            - generic [ref=f2e147]: 7:15
+        - generic [ref=f2e149]:
+          - generic [ref=f2e150]: Message Sara…
+          - generic [ref=f2e151]: ↑
+    - generic [ref=f2e152]:
+      - paragraph [ref=f2e153]: Brand sheet
+      - generic [ref=f2e154]:
+        - generic [ref=f2e155]:
+          - paragraph [ref=f2e157]: Ink
+          - paragraph [ref=f2e158]: "#0B0D12"
+        - generic [ref=f2e159]:
+          - paragraph [ref=f2e161]: Paper
+          - paragraph [ref=f2e162]: "#FFFFFF"
+        - generic [ref=f2e163]:
+          - paragraph [ref=f2e165]: Surface
+          - paragraph [ref=f2e166]: "#F7F8FA"
+        - generic [ref=f2e167]:
+          - paragraph [ref=f2e169]: Teal
+          - paragraph [ref=f2e170]: "#0F766E"
+        - generic [ref=f2e171]:
+          - paragraph [ref=f2e173]: Teal soft
+          - paragraph [ref=f2e174]: "#E6F2F1"
+      - generic [ref=f2e175]:
+        - generic [ref=f2e176]:
+          - generic [ref=f2e177]: Display 64/1.02
+          - generic [ref=f2e178]: Inter Tight 600
+        - generic [ref=f2e179]:
+          - generic [ref=f2e180]: Section heading 40
+          - generic [ref=f2e181]: Inter Tight 600
+        - generic [ref=f2e182]:
+          - generic [ref=f2e183]: Body 15–17, relaxed. نص عربي بخط IBM Plex
+          - generic [ref=f2e184]: Inter / Plex Arabic
+        - generic [ref=f2e185]:
+          - generic [ref=f2e186]: Thu 29 Oct · 6:30 pm
+          - generic [ref=f2e187]: JetBrains Mono · times
+      - list [ref=f2e188]:
+        - listitem [ref=f2e189]: Contrast ink/paper 19.4 · white/teal 5.5 · muted/paper 6.0
+        - listitem [ref=f2e190]: Radius 8 controls · 12 cards · 22 shells · full CTAs
+        - listitem [ref=f2e191]: Patient bubble ink. Sara speaks flat, no bubble.
+        - listitem [ref=f2e192]: Motion rise 10px / 420ms ease-out, slot fill, check draw
+        - listitem [ref=f2e193]: Texture faint 64px grid behind hero only
+        - listitem [ref=f2e194]: "Feel Linear / Stripe: quiet, exact, product-first"

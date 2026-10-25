@@ -1,0 +1,102 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]: Front Desk
+      - link "Try the demo" [ref=e5] [cursor=pointer]:
+        - /url: /chat/sample-smile
+    - main [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - heading [level=1] [ref=e9]:
+            - text: Every patient message answered,
+            - emphasis [ref=e10]: even at 2 a.m.
+          - paragraph [ref=e11]: An AI receptionist for dental clinics. It books, moves and cancels visits on WhatsApp and your website, in English and Arabic.
+          - generic [ref=e12]:
+            - link "Try the demo chat" [ref=e13] [cursor=pointer]:
+              - /url: /chat/sample-smile
+            - link "See how a booking runs" [ref=e14] [cursor=pointer]:
+              - /url: "#night"
+        - figure "Sample conversation, replayed" [ref=e15]:
+          - generic [ref=e16]:
+            - generic [ref=e17]:
+              - generic [aria-hidden] [ref=e18]: S
+              - generic [ref=e19]:
+                - generic [ref=e20]: Sample Smile Dental
+                - generic [ref=e21]: Sara, virtual receptionist
+              - generic [ref=e25]: 23:40
+            - generic [ref=e26]:
+              - generic [ref=e95]: Hi, can I book a cleaning this week? Evenings are best
+              - generic [ref=e98]:
+                - generic [ref=e99]: "Of course. These evening times are free on Thursday:"
+                - generic [ref=e100]:
+                  - generic [ref=e101]: Free times · Cleaning & polish
+                  - generic [ref=e107]:
+                    - generic [ref=e108]: Thu 29 Oct
+                    - generic [ref=e109]:
+                      - generic [ref=e110]:
+                        - button "5:00 pm" [disabled]
+                      - generic [ref=e111]:
+                        - button "6:30 pm" [disabled]
+                      - generic [ref=e112]:
+                        - button "7:15 pm" [disabled]
+              - generic [ref=e113]: 6:30 pm on Thu 29 Oct works for me
+              - generic [ref=e117]:
+                - generic [ref=e118]: Appointment booked
+                - generic [ref=e123]:
+                  - generic [ref=e124]: Cleaning & polish
+                  - generic [ref=e125]: Thu 29 Oct at 6:30 pm
+                  - generic [ref=e129]: Sample Smile Dental, Jumeirah
+              - generic [ref=e133]: شكراً، تمام
+              - generic [ref=e135]: العفو! نشوفك الخميس الساعة ٦:٣٠ مساءً.
+      - generic [ref=e29]:
+        - heading "One patient's booking, while your desk is closed." [level=2] [ref=e31]
+        - list [ref=e32]:
+          - listitem [ref=e33]:
+            - generic [ref=e34]:
+              - generic [ref=e35]: Tue 23:40
+              - generic [ref=e36]: Hi, anything free Thursday evening?
+              - paragraph [ref=e38]: The clinic is closed. Sara answers anyway, in English or Arabic.
+          - listitem [ref=e39]:
+            - generic [ref=e40]:
+              - generic [ref=e41]: Tue 23:41
+              - generic [ref=e42]: "Booked: cleaning & polish, Thu 29 Oct at 6:30 pm."
+              - paragraph [ref=e44]: Real free slots from the clinic's hours. Never a double booking.
+          - listitem [ref=e45]:
+            - generic [ref=e46]:
+              - generic [ref=e47]: Wed 18:30
+              - generic [ref=e48]: "Reminder: your visit is tomorrow at 6:30 pm. Reply 1 to confirm or 2 to change it."
+              - paragraph [ref=e50]: 24 hours before, then again 2 hours before.
+          - listitem [ref=e51]:
+            - generic [ref=e52]:
+              - generic [ref=e53]: Wed 18:32
+              - generic [ref=e54]: "1"
+              - paragraph [ref=e56]: Confirmed. One less empty chair.
+        - paragraph [ref=e58]: Didn't book? One gentle follow-up the next day, naming the next free time. Replying STOP turns follow-ups off.
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - heading [level=2] [ref=e62]:
+            - text: Careful by design,
+            - emphasis [ref=e63]: not by prompt.
+          - paragraph [ref=e64]: The safety checks are plain code that runs before the AI does, so they hold on every message.
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - term [ref=e67]: No medical advice
+            - definition [ref=e68]: Sara books visits and answers clinic questions. Anything clinical goes to your team.
+          - generic [ref=e69]:
+            - term [ref=e70]: Emergencies first
+            - definition [ref=e71]: Messages like “I can't breathe” get the UAE emergency number, 998, before anything else.
+          - generic [ref=e72]:
+            - term [ref=e73]: A person when it matters
+            - definition [ref=e74]: Sara hands the chat to your staff on WhatsApp and stays quiet while they reply.
+          - generic [ref=e75]:
+            - term [ref=e76]: No promises on cover
+            - definition [ref=e77]: Insurance questions get your list of accepted insurers, never a coverage guarantee.
+      - generic [ref=e79]:
+        - heading "Let Sara take the night shift." [level=2] [ref=e81]
+        - link "Chat with Sara" [ref=e82] [cursor=pointer]:
+          - /url: /chat/sample-smile
+    - contentinfo [ref=e83]:
+      - generic [ref=e84]: Front Desk
+      - generic [ref=e85]: The demo uses a sample clinic and sample data.
+  - button "Open Next.js Dev Tools" [ref=e91] [cursor=pointer]
+  - alert [ref=e137]

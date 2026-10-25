@@ -1,0 +1,177 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]: "OPTION B · DEEP GREEN · Geist · forest #0B2E24 + mint #10B981"
+  - generic [ref=f3e3]:
+    - generic [ref=f3e4]:
+      - generic [ref=f3e5]: Front Desk
+      - navigation [ref=f3e10]:
+        - link "How it works" [ref=f3e11] [cursor=pointer]:
+          - /url: "#"
+        - link "Safety" [ref=f3e12] [cursor=pointer]:
+          - /url: "#"
+        - link "Pricing" [ref=f3e13] [cursor=pointer]:
+          - /url: "#"
+      - link "Try the demo" [ref=f3e14] [cursor=pointer]:
+        - /url: "#"
+    - generic [ref=f3e15]:
+      - generic [ref=f3e16]: AI receptionist for dental clinics · Dubai
+      - heading "Every message answered, even at 2 a.m." [level=1] [ref=f3e18]:
+        - generic [ref=f3e19]: Every
+        - generic [ref=f3e20]: message
+        - generic [ref=f3e21]: answered,
+        - generic [ref=f3e22]: even
+        - generic [ref=f3e23]: at 2 a.m.
+      - generic [ref=f3e24]:
+        - paragraph [ref=f3e25]: Sara books, moves and cancels visits on WhatsApp and your website, in English and Arabic. Your desk closes at nine. She doesn't.
+        - generic [ref=f3e26]:
+          - link "Try the demo chat →" [ref=f3e27] [cursor=pointer]:
+            - /url: "#"
+            - text: Try the demo chat
+            - generic [ref=f3e28]: →
+          - link "How a booking runs" [ref=f3e29] [cursor=pointer]:
+            - /url: "#"
+    - generic [ref=f3e30]:
+      - generic [ref=f3e33]:
+        - generic [ref=f3e34]:
+          - paragraph [ref=f3e35]: Tue 23:40 · clinic closed
+          - paragraph [ref=f3e36]: A booking made while your team sleeps.
+          - list [ref=f3e37]:
+            - listitem [ref=f3e38]:
+              - generic [ref=f3e39]: "01"
+              - text: Real free slots from your hours
+            - listitem [ref=f3e40]:
+              - generic [ref=f3e41]: "02"
+              - text: Booked, never double-booked
+            - listitem [ref=f3e42]:
+              - generic [ref=f3e43]: "03"
+              - text: Reminder 24 h and 2 h before
+        - generic [ref=f3e44]:
+          - generic [ref=f3e45]:
+            - generic [ref=f3e46]: S
+            - generic [ref=f3e47]:
+              - generic [ref=f3e48]: Sample Smile Dental
+              - generic [ref=f3e49]: Sara · online
+          - generic [ref=f3e50]:
+            - generic [ref=f3e51]: Anything free Thursday evening?
+            - generic [ref=f3e52]: "Yes. Scaling & polishing, Thursday:"
+            - generic [ref=f3e53]:
+              - generic [ref=f3e54]: 5:00 pm
+              - generic [ref=f3e55]: 6:30 pm ✓
+              - generic [ref=f3e56]: 7:15 pm
+            - generic [ref=f3e57]:
+              - generic [ref=f3e58]: ✓
+              - generic [ref=f3e59]:
+                - generic [ref=f3e60]: Booked · Thu 29 Oct, 6:30 pm
+                - generic [ref=f3e61]: Al Barsha, Dubai
+      - paragraph [ref=f3e62]: Sample conversation · sample clinic
+  - generic [ref=f3e63]:
+    - paragraph [ref=f3e64]: Web chat · full-screen app · 1280px
+    - generic [ref=f3e66]:
+      - complementary [ref=f3e67]:
+        - generic [ref=f3e68]:
+          - generic [ref=f3e69]: S
+          - generic [ref=f3e70]:
+            - generic [ref=f3e71]: Sample Smile Dental
+            - generic [ref=f3e72]: Sample clinic
+        - generic [ref=f3e73]:
+          - generic [ref=f3e74]: Open now
+          - generic [ref=f3e75]: Sat–Thu · 09:00–21:00
+          - generic [ref=f3e76]: Fri · closed
+        - generic [ref=f3e77]: Services
+        - list [ref=f3e78]:
+          - listitem [ref=f3e79]:
+            - generic [ref=f3e80]: Check-up
+            - generic [ref=f3e81]: "150"
+          - listitem [ref=f3e82]:
+            - generic [ref=f3e83]: Scaling & polishing
+            - generic [ref=f3e84]: "300"
+          - listitem [ref=f3e85]:
+            - generic [ref=f3e86]: Filling
+            - generic [ref=f3e87]: "350"
+          - listitem [ref=f3e88]:
+            - generic [ref=f3e89]: Whitening
+            - generic [ref=f3e90]: 1,200
+        - paragraph [ref=f3e91]: AED · sample prices
+        - generic [ref=f3e92]:
+          - link "Call clinic" [ref=f3e93] [cursor=pointer]:
+            - /url: "#"
+          - link "Al Barsha, Dubai · Maps" [ref=f3e94] [cursor=pointer]:
+            - /url: "#"
+      - generic [ref=f3e95]:
+        - generic [ref=f3e96]:
+          - generic [ref=f3e98]: Sara
+          - generic [ref=f3e99]: · virtual receptionist · replies in seconds
+        - generic [ref=f3e101]:
+          - generic [ref=f3e102]: Hi, I'm Sara from Sample Smile Dental. I can book, move or cancel a visit, and answer questions about prices, hours and location.
+          - generic [ref=f3e103]: Can I book a cleaning on Thursday evening?
+          - generic [ref=f3e104]:
+            - text: "Sure. Scaling & polishing takes 45 minutes. These times are free:"
+            - generic [ref=f3e105]:
+              - button "5:00 pm" [ref=f3e106] [cursor=pointer]
+              - button "6:30 pm" [ref=f3e107] [cursor=pointer]
+              - button "7:15 pm" [ref=f3e108] [cursor=pointer]
+              - button "8:00 pm" [ref=f3e109] [cursor=pointer]
+        - generic [ref=f3e111]:
+          - generic [ref=f3e112]:
+            - textbox "Message Sara…" [ref=f3e113]
+            - button "Send" [ref=f3e114] [cursor=pointer]: ↑
+          - generic [ref=f3e115]:
+            - generic [ref=f3e116]: Prices
+            - generic [ref=f3e117]: Location
+            - generic [ref=f3e118]: أبغى أحجز موعد
+  - generic [ref=f3e120]:
+    - generic [ref=f3e121]:
+      - paragraph [ref=f3e122]: Mobile · 360px
+      - generic [ref=f3e123]:
+        - generic [ref=f3e124]:
+          - generic [ref=f3e125]: S
+          - generic [ref=f3e126]: Sample Smile Dental
+          - generic [ref=f3e127]: Call
+        - generic [ref=f3e128]:
+          - generic [ref=f3e129]: Hi, I'm Sara. How can I help?
+          - generic [ref=f3e130]: أبغى أحجز تنظيف يوم الخميس
+          - generic [ref=f3e131]: "أكيد! هذي الأوقات المتاحة يوم الخميس:"
+          - generic [ref=f3e132]:
+            - generic [ref=f3e133]: 5:00
+            - generic [ref=f3e134]: 6:30
+            - generic [ref=f3e135]: 7:15
+        - generic [ref=f3e137]:
+          - generic [ref=f3e138]: Message Sara…
+          - generic [ref=f3e139]: ↑
+    - generic [ref=f3e140]:
+      - paragraph [ref=f3e141]: Brand sheet
+      - generic [ref=f3e142]:
+        - generic [ref=f3e143]:
+          - paragraph [ref=f3e145]: Forest
+          - paragraph [ref=f3e146]: "#0B2E24"
+        - generic [ref=f3e147]:
+          - paragraph [ref=f3e149]: Mint
+          - paragraph [ref=f3e150]: "#10B981 · fill only"
+        - generic [ref=f3e151]:
+          - paragraph [ref=f3e153]: Mint soft
+          - paragraph [ref=f3e154]: "#D9F3E8"
+        - generic [ref=f3e155]:
+          - paragraph [ref=f3e157]: Paper
+          - paragraph [ref=f3e158]: "#F5F7F6"
+        - generic [ref=f3e159]:
+          - paragraph [ref=f3e161]: Surface
+          - paragraph [ref=f3e162]: "#FFFFFF"
+      - generic [ref=f3e163]:
+        - generic [ref=f3e164]:
+          - generic [ref=f3e165]: Display 132/0.92
+          - generic [ref=f3e166]: Geist 600 · −5%
+        - generic [ref=f3e167]:
+          - generic [ref=f3e168]: Section heading 44
+          - generic [ref=f3e169]: Geist 600
+        - generic [ref=f3e170]:
+          - generic [ref=f3e171]: Body 15–18. نص عربي بخط IBM Plex
+          - generic [ref=f3e172]: Geist / Plex Arabic
+        - generic [ref=f3e173]:
+          - generic [ref=f3e174]: Thu 29 Oct · 6:30 pm
+          - generic [ref=f3e175]: Geist Mono · times
+      - list [ref=f3e176]:
+        - listitem [ref=f3e177]: Contrast forest/paper 13.6 · forest on mint 5.8 · muted 5.2
+        - listitem [ref=f3e178]: Rule mint never carries white text; only forest text on it
+        - listitem [ref=f3e179]: Radius pills for chips/CTAs · 16 bubbles · 28 bands
+        - listitem [ref=f3e180]: Motion headline word stagger, rise 10px / 420ms
+        - listitem [ref=f3e181]: Blocks deep green bands carry proof + product
+        - listitem [ref=f3e182]: Feel confident, editorial, Gulf-premium health brand

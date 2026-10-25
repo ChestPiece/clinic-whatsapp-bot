@@ -1,0 +1,79 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - generic [ref=f3e4]:
+        - generic [ref=f3e5]: Front Desk
+        - link "Try the demo" [ref=f3e9] [cursor=pointer]:
+          - /url: /chat/sample-smile
+      - generic [ref=f3e10]:
+        - generic [ref=f3e12]:
+          - text: Answering in English and
+          - generic [ref=f3e14]: عربي
+        - heading "Every patient message answered, even at 2 a.m." [level=1] [ref=f3e16]
+        - generic [ref=f3e17]:
+          - paragraph [ref=f3e18]: An AI receptionist for dental clinics. It books, moves and cancels visits on WhatsApp and your website.
+          - generic [ref=f3e19]:
+            - link "Try the demo chat" [ref=f3e20] [cursor=pointer]:
+              - /url: /chat/sample-smile
+            - link "See how it works" [ref=f3e21] [cursor=pointer]:
+              - /url: "#night"
+      - figure "Sample conversation, replayed" [ref=f3e25]:
+        - generic [ref=f3e27]:
+          - generic [aria-hidden] [ref=f3e28]: S
+          - generic [ref=f3e29]:
+            - generic [ref=f3e30]: Sample Smile Dental
+            - generic [ref=f3e31]: Sara, virtual receptionist
+          - generic [ref=f3e35]: 23:40
+    - generic [ref=f3e39]:
+      - generic [ref=f3e40]:
+        - paragraph [ref=f3e41]: How a booking runs
+        - heading "One patient's booking, while your desk is closed." [level=2] [ref=f3e42]
+      - list [ref=f3e43]:
+        - listitem [ref=f3e44]:
+          - generic [ref=f3e45]:
+            - generic [ref=f3e46]: Tue 23:40
+            - generic [ref=f3e47]: Hi, anything free Thursday evening?
+            - paragraph [ref=f3e49]: The clinic is closed. Sara answers anyway, in English or Arabic.
+        - listitem [ref=f3e50]:
+          - generic [ref=f3e51]:
+            - generic [ref=f3e52]: Tue 23:41
+            - generic [ref=f3e53]: "Booked: cleaning & polish, Thu 29 Oct at 6:30 pm."
+            - paragraph [ref=f3e55]: Real free slots from the clinic's hours. Never a double booking.
+        - listitem [ref=f3e56]:
+          - generic [ref=f3e57]:
+            - generic [ref=f3e58]: Wed 18:30
+            - generic [ref=f3e59]: "Reminder: your visit is tomorrow at 6:30 pm. Reply 1 to confirm or 2 to change it."
+            - paragraph [ref=f3e61]: 24 hours before, then again 2 hours before.
+        - listitem [ref=f3e62]:
+          - generic [ref=f3e63]:
+            - generic [ref=f3e64]: Wed 18:32
+            - generic [ref=f3e65]: "1"
+            - paragraph [ref=f3e67]: Confirmed. One less empty chair.
+      - paragraph [ref=f3e69]: Didn't book? One gentle follow-up the next day, naming the next free time. Replying STOP turns follow-ups off.
+    - generic [ref=f3e71]:
+      - generic [ref=f3e72]:
+        - paragraph [ref=f3e73]: Safety
+        - heading "Careful by design, not by prompt." [level=2] [ref=f3e74]
+        - paragraph [ref=f3e75]: The safety checks are plain code that runs before the AI does, so they hold on every message.
+      - generic [ref=f3e76]:
+        - generic [ref=f3e77]:
+          - term [ref=f3e78]: No medical advice
+          - definition [ref=f3e79]: Sara books visits and answers clinic questions. Anything clinical goes to your team.
+        - generic [ref=f3e80]:
+          - term [ref=f3e81]: Emergencies first
+          - definition [ref=f3e82]: Messages like “I can't breathe” get the UAE emergency number, 998, before anything else.
+        - generic [ref=f3e83]:
+          - term [ref=f3e84]: A person when it matters
+          - definition [ref=f3e85]: Sara hands the chat to your staff on WhatsApp and stays quiet while they reply.
+        - generic [ref=f3e86]:
+          - term [ref=f3e87]: No promises on cover
+          - definition [ref=f3e88]: Insurance questions get your list of accepted insurers, never a coverage guarantee.
+    - generic [ref=f3e91]:
+      - heading "Let Sara take the night shift." [level=2] [ref=f3e93]
+      - link "Chat with Sara" [ref=f3e94] [cursor=pointer]:
+        - /url: /chat/sample-smile
+    - contentinfo [ref=f3e95]:
+      - generic [ref=f3e96]: Front Desk
+      - generic [ref=f3e100]: The demo uses a sample clinic and sample data.
+  - button "Open Next.js Dev Tools" [ref=f3e106] [cursor=pointer]
+  - alert [ref=f3e110]

@@ -1,0 +1,172 @@
+- generic [active] [ref=f4e1]:
+  - generic [ref=f4e2]: "OPTION C · STONE & SAGE · Manrope + Readex Pro · sage #4F6F5C"
+  - generic [ref=f4e3]:
+    - generic [ref=f4e4]:
+      - generic [ref=f4e5]: Front Desk
+      - navigation [ref=f4e10]:
+        - link "How it works" [ref=f4e11] [cursor=pointer]:
+          - /url: "#"
+        - link "Safety" [ref=f4e12] [cursor=pointer]:
+          - /url: "#"
+        - link "For clinics" [ref=f4e13] [cursor=pointer]:
+          - /url: "#"
+      - link "Try the demo" [ref=f4e14] [cursor=pointer]:
+        - /url: "#"
+    - generic [ref=f4e15]:
+      - generic [ref=f4e16]:
+        - text: Now answering in English and
+        - generic [ref=f4e18]: عربي
+      - heading "Every patient message answered, even at 2 a.m." [level=1] [ref=f4e19]
+      - paragraph [ref=f4e20]: A calm AI receptionist for dental clinics. It books, moves and cancels visits on WhatsApp and your website.
+      - generic [ref=f4e21]:
+        - link "Try the demo chat →" [ref=f4e22] [cursor=pointer]:
+          - /url: "#"
+        - link "See how it works" [ref=f4e23] [cursor=pointer]:
+          - /url: "#"
+    - generic [ref=f4e24]:
+      - generic [ref=f4e26]:
+        - generic [ref=f4e27]:
+          - generic [ref=f4e28]: Reminder · 24 h before
+          - paragraph [ref=f4e29]: Your visit is tomorrow at 6:30 pm. Reply 1 to confirm or 2 to change it.
+          - generic [ref=f4e30]: Patient replied “1” ✓
+        - generic [ref=f4e31]:
+          - generic [ref=f4e32]:
+            - generic [ref=f4e33]: S
+            - generic [ref=f4e34]:
+              - generic [ref=f4e35]: Sample Smile Dental
+              - generic [ref=f4e36]: Sara is here to help
+          - generic [ref=f4e37]:
+            - generic [ref=f4e38]: Hi, can I book a cleaning this week? Evenings are best
+            - generic [ref=f4e39]: "Of course. These evening times are free on Thursday:"
+            - generic [ref=f4e40]:
+              - generic [ref=f4e41]: 5:00 pm
+              - generic [ref=f4e42]: 6:30 pm
+              - generic [ref=f4e43]: 7:15 pm
+            - generic [ref=f4e44]:
+              - generic [ref=f4e45]:
+                - generic [ref=f4e46]: ✓
+                - text: You're booked
+              - paragraph [ref=f4e47]: Scaling & polishing · Thu 29 Oct, 6:30 pm
+        - generic [ref=f4e48]:
+          - generic [ref=f4e49]: Safety
+          - paragraph [ref=f4e50]: “I can't breathe” gets the UAE emergency number, 998, before anything else.
+      - paragraph [ref=f4e51]: Sample conversation · sample clinic
+  - generic [ref=f4e52]:
+    - paragraph [ref=f4e53]: Web chat · full-screen app · 1280px
+    - generic [ref=f4e54]:
+      - generic [ref=f4e55]:
+        - generic [ref=f4e56]: S
+        - generic [ref=f4e57]:
+          - generic [ref=f4e58]:
+            - text: Sample Smile Dental
+            - generic [ref=f4e59]: Sample
+          - generic [ref=f4e60]: Sara, virtual receptionist
+        - generic [ref=f4e61]:
+          - button "Clinic info" [ref=f4e62] [cursor=pointer]
+          - button "Call" [ref=f4e63] [cursor=pointer]
+      - generic [ref=f4e64]:
+        - generic [ref=f4e65]:
+          - generic [ref=f4e67]:
+            - paragraph [ref=f4e68]: Today
+            - generic [ref=f4e69]: Hi, I'm Sara from Sample Smile Dental. I can book, move or cancel a visit, and answer questions about prices, hours and location.
+            - generic [ref=f4e70]: Can I book a cleaning on Thursday evening?
+            - generic [ref=f4e71]: "Sure. Scaling & polishing takes 45 minutes. Pick a time:"
+            - generic [ref=f4e72]:
+              - button "5:00" [ref=f4e73] [cursor=pointer]
+              - button "6:30" [ref=f4e74] [cursor=pointer]
+              - button "7:15" [ref=f4e75] [cursor=pointer]
+              - button "8:00" [ref=f4e76] [cursor=pointer]
+          - generic [ref=f4e78]:
+            - generic [ref=f4e79]:
+              - generic [ref=f4e80]: Prices
+              - generic [ref=f4e81]: Location
+              - generic [ref=f4e82]: أبغى أحجز موعد
+            - generic [ref=f4e83]:
+              - textbox "Message Sara…" [ref=f4e84]
+              - button "Send" [ref=f4e85] [cursor=pointer]: ↑
+        - complementary [ref=f4e86]:
+          - generic [ref=f4e87]:
+            - generic [ref=f4e88]: Hours
+            - generic [ref=f4e89]:
+              - term [ref=f4e90]: Sat – Thu
+              - definition [ref=f4e91]: 09:00 – 21:00
+              - term [ref=f4e92]: Friday
+              - definition [ref=f4e93]: Closed
+            - paragraph [ref=f4e94]: Open now
+          - generic [ref=f4e96]:
+            - generic [ref=f4e97]: Services · AED
+            - list [ref=f4e98]:
+              - listitem [ref=f4e99]:
+                - generic [ref=f4e100]: Check-up
+                - generic [ref=f4e101]: "150"
+              - listitem [ref=f4e102]:
+                - generic [ref=f4e103]: Scaling & polishing
+                - generic [ref=f4e104]: "300"
+              - listitem [ref=f4e105]:
+                - generic [ref=f4e106]: Filling
+                - generic [ref=f4e107]: "350"
+              - listitem [ref=f4e108]:
+                - generic [ref=f4e109]: Whitening
+                - generic [ref=f4e110]: 1,200
+          - generic [ref=f4e111]:
+            - generic [ref=f4e112]: Find us
+            - paragraph [ref=f4e113]: Al Barsha, Dubai
+            - link "Open in Maps" [ref=f4e114] [cursor=pointer]:
+              - /url: "#"
+  - generic [ref=f4e116]:
+    - generic [ref=f4e117]:
+      - paragraph [ref=f4e118]: Mobile · 360px
+      - generic [ref=f4e119]:
+        - generic [ref=f4e120]:
+          - generic [ref=f4e121]: S
+          - generic [ref=f4e122]: Sample Smile Dental
+          - generic [ref=f4e123]: Call
+        - generic [ref=f4e124]:
+          - generic [ref=f4e125]: Hi, I'm Sara. How can I help?
+          - generic [ref=f4e126]: أبغى أحجز تنظيف يوم الخميس
+          - generic [ref=f4e127]: "أكيد! هذي الأوقات المتاحة يوم الخميس:"
+          - generic [ref=f4e128]:
+            - generic [ref=f4e129]: 5:00
+            - generic [ref=f4e130]: 6:30
+            - generic [ref=f4e131]: 7:15
+        - generic [ref=f4e133]:
+          - generic [ref=f4e134]: Message Sara…
+          - generic [ref=f4e135]: ↑
+    - generic [ref=f4e136]:
+      - paragraph [ref=f4e137]: Brand sheet
+      - generic [ref=f4e138]:
+        - generic [ref=f4e139]:
+          - paragraph [ref=f4e141]: Ink
+          - paragraph [ref=f4e142]: "#1C1917"
+        - generic [ref=f4e143]:
+          - paragraph [ref=f4e145]: Sage
+          - paragraph [ref=f4e146]: "#4F6F5C"
+        - generic [ref=f4e147]:
+          - paragraph [ref=f4e149]: Sage soft
+          - paragraph [ref=f4e150]: "#E8EFEA"
+        - generic [ref=f4e151]:
+          - paragraph [ref=f4e153]: Stone
+          - paragraph [ref=f4e154]: "#FAFAF9"
+        - generic [ref=f4e155]:
+          - paragraph [ref=f4e157]: Panel
+          - paragraph [ref=f4e158]: "#F2F1EE"
+      - generic [ref=f4e159]:
+        - generic [ref=f4e160]:
+          - generic [ref=f4e161]: Display 68/1.02
+          - generic [ref=f4e162]: Manrope 800
+        - generic [ref=f4e163]:
+          - generic [ref=f4e164]: Section heading 40
+          - generic [ref=f4e165]: Manrope 700
+        - generic [ref=f4e166]:
+          - generic [ref=f4e167]: Body 15–18, warm and round. نص عربي بخط ريدكس
+          - generic [ref=f4e168]: Manrope / Readex Pro
+        - generic [ref=f4e169]:
+          - generic [ref=f4e170]: Thu 29 Oct · 6:30 pm
+          - generic [ref=f4e171]: IBM Plex Mono · times
+      - list [ref=f4e172]:
+        - listitem [ref=f4e173]: Contrast ink/stone 16.7 · white/sage 5.6 · muted 7.3
+        - listitem [ref=f4e174]: "Radius soft: 12 slots · 18 bubbles · 22 cards · 36 panels"
+        - listitem [ref=f4e175]: Surfaces no hard borders; tone steps stone → panel → white
+        - listitem [ref=f4e176]: Motion rise 12px / 500ms, slow 6s float on hero only
+        - listitem [ref=f4e177]: Layout centered hero, product overlaps a soft panel
+        - listitem [ref=f4e178]: Feel calm, hospitable, spa-clinic rather than SaaS

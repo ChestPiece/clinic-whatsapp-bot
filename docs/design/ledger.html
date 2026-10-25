@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Ledger</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Onest:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Readex+Pro:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4efe5;--card:#fbf8f1;--ink:#1d1b17;--muted:#736c60;--rule:#ddd4c3;--rule2:#e9e2d4;--red:#c4512d;--red-soft:#f4dccf;--sage:#4f6f5c;--sage-soft:#dfe8df;--blue:#33506e;--blue-soft:#dbe3eb;--shadow:0 1px 0 #fff inset,0 18px 40px -24px rgb(60 45 20/.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#17150f;--card:#201d17;--ink:#efe8da;--muted:#a59c8b;--rule:#353026;--rule2:#2a261f;--red:#e8825f;--red-soft:#3d2219;--sage:#93b59d;--sage-soft:#22302a;--blue:#93aecb;--blue-soft:#1f2a36;--shadow:0 18px 40px -24px rgb(0 0 0/.7)}}
+:root[data-theme="dark"]{--paper:#17150f;--card:#201d17;--ink:#efe8da;--muted:#a59c8b;--rule:#353026;--rule2:#2a261f}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 "Onest",system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+ background-image:radial-gradient(rgb(120 100 60/.06) 1px,transparent 1px);background-size:4px 4px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.mono{font:500 11px "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-bottom:1px solid var(--ink)}
+nav b{font:500 24px "Newsreader",serif;letter-spacing:-.02em}
+nav b i{color:var(--red)}
+.mast{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding:44px 0 28px;border-bottom:1px solid var(--rule)}
+h1{font:400 clamp(44px,6.4vw,88px)/.95 "Newsreader",serif;letter-spacing:-.035em;max-width:13ch}
+h1 i{color:var(--red)}
+.mast p{max-width:34ch;color:var(--muted);font-size:16px}
+.tally{display:flex;gap:28px;padding:18px 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.tally div{display:flex;gap:10px;align-items:baseline}
+.tally strong{font:400 34px "Newsreader",serif;font-variant-numeric:tabular-nums;letter-spacing:-.02em;display:inline-block;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.tally strong.bump{transform:translateY(-4px) scale(1.08);color:var(--red)}
+.desk{display:grid;grid-template-columns:340px 1fr;gap:28px;padding:32px 0 56px}
+/* conversation slip */
+.slip{background:var(--card);border:1px solid var(--rule);border-radius:4px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:600px;position:relative}
+.slip::before{content:"";position:absolute;left:0;right:0;top:-6px;height:12px;background:radial-gradient(circle at 6px 6px,var(--paper) 4px,transparent 4.5px) 0 0/16px 12px repeat-x}
+.slip header{padding:22px 20px 14px;border-bottom:1px dashed var(--rule)}
+.slip header h3{font:400 22px "Newsreader",serif}
+.thread{flex:1;padding:16px 20px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;overflow:hidden}
+.ln{display:grid;grid-template-columns:42px 1fr;gap:10px;font-size:14px;opacity:0;transform:translateX(-8px);transition:opacity .5s,transform .6s cubic-bezier(.23,1,.32,1)}
+.ln.in{opacity:1;transform:none}
+.ln .who{font:500 10.5px "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:3px}
+.ln.s .who{color:var(--sage)}
+.ln.s .tx{font:italic 400 16px/1.4 "Newsreader",serif}
+.ln.ar .tx{font-family:"Readex Pro";direction:rtl;font-style:normal;font-size:14px}
+.ln.sys .tx{font:500 12px "IBM Plex Mono",monospace;color:var(--red);border:1px dashed var(--red);padding:6px 8px;border-radius:3px}
+.caret{display:inline-block;width:7px;height:15px;background:var(--sage);vertical-align:-2px;animation:bl .9s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.slip footer{border-top:1px dashed var(--rule);padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+.btn{font:500 13px "Onest";background:var(--ink);color:var(--paper);border:0;border-radius:99px;padding:9px 16px;cursor:pointer;transition:transform .15s,background .2s}
+.btn:hover{background:var(--red)}.btn:active{transform:scale(.96)}
+/* calendar */
+.cal{background:var(--card);border:1px solid var(--rule);border-radius:4px;box-shadow:var(--shadow);overflow:hidden}
+.cal header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--rule)}
+.cal header h3{font:400 22px "Newsreader",serif}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-inline-end:6px;vertical-align:-1px}
+.grid{display:grid;grid-template-columns:52px repeat(6,1fr);position:relative}
+.dh{padding:10px 8px;border-bottom:1px solid var(--rule);border-left:1px solid var(--rule2);font:500 12px "Onest"}
+.dh small{display:block;font:400 22px "Newsreader",serif;letter-spacing:-.02em}
+.dh.today small{color:var(--red)}
+.hr{height:52px;border-bottom:1px solid var(--rule2);font:400 10.5px "IBM Plex Mono",monospace;color:var(--muted);padding:4px 6px;text-align:right}
+.col{border-left:1px solid var(--rule2);position:relative;background:repeating-linear-gradient(var(--card) 0 51px,var(--rule2) 51px 52px)}
+.ap{position:absolute;left:4px;right:4px;border-radius:4px;padding:5px 7px;font-size:11.5px;line-height:1.25;overflow:hidden;border-left:3px solid;
+ transform:translateY(-40px) rotate(-3deg);opacity:0;transition:transform .8s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+.ap.in{transform:none;opacity:1}
+.ap strong{display:block;font-weight:600}
+.ap.wa{background:var(--sage-soft);border-color:var(--sage)}
+.ap.web{background:var(--blue-soft);border-color:var(--blue)}
+.ap.staff{background:var(--red-soft);border-color:var(--red)}
+.ap.fresh{box-shadow:0 0 0 2px var(--ink)}
+.now{position:absolute;left:52px;right:0;height:2px;background:var(--red);z-index:2}
+.now::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:9px;background:var(--red)}
+/* notes */
+.colophon{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink);padding:28px 0 64px;gap:32px}
+.colophon h4{font:400 22px "Newsreader",serif;margin:8px 0 6px}
+.colophon p{color:var(--muted);font-size:14px}
+@media (max-width:900px){.desk,.mast,.colophon{grid-template-columns:1fr}.slip{height:480px}.grid{grid-template-columns:40px repeat(3,1fr)}.d4,.d5,.d6{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <nav><b>Receptly<i>.</i></b><span class="mono">Direction B · The Ledger · Sample Smile Dental</span></nav>
+ <section class="mast">
+  <h1>The appointment book, <i>writing itself.</i></h1>
+  <p>A warm paper desk instead of a SaaS dashboard. Every chat Sara has ends as ink on the week. Front-desk staff see their real tool, the book, not a feed of AI messages.</p>
+ </section>
+ <div class="tally">
+  <div><strong id="t1">0</strong><span class="mono">Booked by Sara this week</span></div>
+  <div><strong id="t2">0</strong><span class="mono">After hours</span></div>
+  <div><strong id="t3">0</strong><span class="mono">Need staff</span></div>
+ </div>
+
+ <section class="desk">
+  <div class="slip">
+   <header><span class="mono">WhatsApp · +971 50 ••• 4412</span><h3>Layla Haddad</h3></header>
+   <div class="thread" id="thread"></div>
+   <footer><span class="mono" id="state">Sara is replying</span><button class="btn">Take over</button></footer>
+  </div>
+  <div class="cal">
+   <header><h3>Week of 26 October</h3><div class="legend"><span><b style="background:var(--sage)"></b>WhatsApp</span><span><b style="background:var(--blue)"></b>Website</span><span><b style="background:var(--red)"></b>Needs staff</span></div></header>
+   <div class="grid" id="grid"></div>
+  </div>
+ </section>
+
+ <section class="colophon">
+  <div><span class="mono">Type</span><h4>Newsreader &amp; Onest</h4><p>A book serif for names, dates and Sara's voice (in italics, like a handwritten note). Onest for the working interface. Plex Mono for times and phone numbers.</p></div>
+  <div><span class="mono">Motion</span><h4>Ink drops onto the page</h4><p>When Sara confirms, the slot falls into the calendar with a spring and a slight tilt, like a card pinned to a board. Tally numbers bump as they change.</p></div>
+  <div><span class="mono">Why</span><h4>Familiar to reception</h4><p>Clinics already think in the appointment book. The AI disappears into the tool they trust, which is how it earns that trust.</p></div>
+ </section>
+</div>
+<script>
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const days=[['Mon',26],['Tue',27],['Wed',28],['Thu',29],['Fri',30],['Sat',31]];
+const hours=[9,10,11,12,13,14,15,16,17,18,19];
+const grid=document.getElementById('grid');
+grid.innerHTML='<div class="dh"></div>'+days.map((d,i)=>`<div class="dh d${i+1}${i==3?' today':''}">${d[0]}<small>${d[1]}</small></div>`).join('')
+ +'<div>'+hours.map(h=>`<div class="hr">${h}:00</div>`).join('')+'</div>'+days.map((d,i)=>`<div class="col d${i+1}" data-c="${i}"></div>`).join('');
+const cols=grid.querySelectorAll('.col');
+// [day, startHour, lengthH, title, name, kind, afterHours]
+const appts=[[0,9.5,1,'Check-up','Omar M.','wa',1],[1,11,.75,'Cleaning','Sophie R.','web',0],[0,14,1.5,'Root canal','Ahmed K.','wa',1],[2,10,1,'Kids visit','Mira S.','web',1],[4,16,1,'Lost crown','Nadia P.','staff',1],[2,15,.75,'Cleaning','Hassan A.','wa',1],[5,10.5,1,'Check-up','James D.','web',0],[1,17,1,'Aligners','Omar F.','staff',0],[4,12,.75,'Cleaning','Rania T.','wa',1],[3,18.5,1,'Whitening','Layla H.','wa',1]];
+const conv=[['p','Hi, I want whitening before my sister\'s wedding'],['s','Congratulations! Whitening takes about an hour. Thursday 6:30 pm is open, shall I hold it?'],['p','Yes please'],['book',9],['s','Done. Thursday 29 Oct at 6:30 pm. I\'ll remind you the day before.'],['p','Does Daman cover it?'],['sys','Insurance question · sent to front desk'],['s','I can\'t confirm coverage myself, so the front desk will message you by 10 am.']];
+const thread=document.getElementById('thread'),T=[t1,t2,t3].map(x=>x),tally=[0,0,0];
+function bump(i){tally[i]++;const el=T[i];el.textContent=tally[i];el.classList.add('bump');setTimeout(()=>el.classList.remove('bump'),350)}
+function place(i,fresh){const[d,s,l,t,n,k,ah]=appts[i];const e=document.createElement('div');e.className='ap '+k+(fresh?' fresh':'');e.style.top=((s-9)*52+2)+'px';e.style.height=(l*52-4)+'px';e.innerHTML=`<strong>${t}</strong>${n}`;cols[d].appendChild(e);
+ requestAnimationFrame(()=>requestAnimationFrame(()=>e.classList.add('in')));k==='staff'?bump(2):(bump(0),ah&&bump(1));if(fresh)setTimeout(()=>e.classList.remove('fresh'),2600)}
+const now=document.createElement('div');now.className='now';now.style.top=(68+(18.2-9)*52)+'px';grid.appendChild(now);
+function line(k,txt){const e=document.createElement('div');e.className='ln '+k;e.innerHTML=`<span class="who">${k==='p'?'Layla':k==='s'?'Sara':'Note'}</span><span class="tx"></span>`;thread.appendChild(e);requestAnimationFrame(()=>e.classList.add('in'));return e.querySelector('.tx')}
+const wait=ms=>new Promise(r=>setTimeout(r,reduce?0:ms));
+async function type(el,txt){if(reduce){el.textContent=txt;return}const c=document.createElement('span');c.className='caret';for(let i=0;i<=txt.length;i++){el.textContent=txt.slice(0,i);el.appendChild(c);await wait(18)}c.remove()}
+async function run(){
+ for(let i=0;i<9;i++){place(i);await wait(260)}
+ for(const[k,v]of conv){
+  if(k==='book'){place(v,true);await wait(900);continue}
+  const el=line(k,'');
+  if(k==='s'){state.textContent='Sara is typing';await type(el,v);state.textContent='Sara is replying'}else{el.textContent=v}
+  await wait(k==='p'?1100:700)
+ }
+ state.textContent='Waiting for front desk';
+ await wait(6000);if(reduce)return;
+ thread.innerHTML='';cols.forEach(c=>c.innerHTML='');tally.fill(0);T.forEach(e=>e.textContent=0);run()
+}
+run();
+</script>
+</body>
+</html>
