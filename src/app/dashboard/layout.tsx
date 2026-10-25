@@ -6,6 +6,8 @@ import { desk } from "@/lib/dashboard";
 import { pickClinic, signOut } from "./actions";
 import { Live, Nav } from "./shell";
 
+// Dashboard is per-user (auth cookies), so it renders on request instead of prerendering.
+export const instant = false;
 export const metadata: Metadata = { title: { default: "Front Desk", template: "%s · Front Desk" } };
 
 export default async function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
