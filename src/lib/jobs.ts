@@ -1,13 +1,15 @@
-// Outbound jobs run by POST /api/cron every 15 min (pg_cron + pg_net). Today: 24h and 2h visit reminders.
+// Outbound jobs run by POST /api/cron every 15 min (pg_cron + pg_net), for every active clinic: reminders and follow-ups.
 import { assistant, type AgentInputItem } from "@openai/agents";
-import { loadClinic, slotsOn, stillPaused, trimHistory } from "./agent";
-import { db } from "./db";
+import { stillPaused, trimHistory } from "./agent";
+import { activeClinics, personaName, type Clinic } from "./clinics";
+import { db, logMessages } from "./db";
+import { slotsOn } from "./sara";
 import { localDate, toUtc } from "./slots";
 import { sendText } from "./whatsapp";
 
 const HOUR = 3_600_000;
 const MIN_LEAD_MS = 30 * 60_000; // a reminder this close to the visit is noise
-const MAX_SENDS = 20; // per run: pace outbound traffic so the UltraMsg number does not look like a bulk sender
+const MAX_SENDS = 20; // per clinic per run: pace outbound traffic so the UltraMsg number does not look like a bulk sender
 
 // Patients only get messages they did not ask for between 09:00 and 21:00 clinic time.
 export const quietHours = (now: Date, offsetMin: number) => {
@@ -65,13 +67,14 @@ export function guessService(historyJson: string, services: string[]) {
   return best?.name ?? null;
 }
 
-export function followupText(f: { name: string | null; service: string | null; slot: string | null; clinic: string }) {
+export function followupText(f: { name: string | null; service: string | null; slot: string | null; clinic: string; persona?: string }) {
   const first = f.name?.trim().split(/\s+/)[0];
-  const hi = `Hi${first ? ` ${first}` : ""}, it's Sara from ${f.clinic}.`;
+  const persona = f.persona ?? "Sara";
+  const hi = `Hi${first ? ` ${first}` : ""}, it's ${persona} from ${f.clinic}.`;
   const en = f.service
     ? `${hi} Still keen on a ${f.service}?${f.slot ? ` I have ${f.slot} free, shall I book it for you?` : " I can find you a time."}`
     : `${hi} Just checking in, can I help you book a visit?${f.slot ? ` I have ${f.slot} free.` : ""}`;
-  const ar = `مرحباً${first ? ` ${first}` : ""}، معك سارة من ${f.clinic}. هل ما زلت ترغب بحجز موعد${f.service ? ` (${f.service})` : ""}؟${f.slot ? ` لدي موعد متاح ${f.slot}.` : ""}`;
+  const ar = `مرحباً${first ? ` ${first}` : ""}، معك ${persona === "Sara" ? "سارة" : persona} من ${f.clinic}. هل ما زلت ترغب بحجز موعد${f.service ? ` (${f.service})` : ""}؟${f.slot ? ` لدي موعد متاح ${f.slot}.` : ""}`;
   return `${en}\n${ar}\n(Reply STOP to stop these messages. أرسل توقف لإيقافها.)`;
 }
 
@@ -95,18 +98,17 @@ async function appendToChat(patientId: string, text: string) {
   if (error) console.error("[outbound history]", error.message);
 }
 
-async function send(to: string, text: string, patientId: string, kind: string) {
+async function send(clinic: Clinic, to: string, text: string, patientId: string, kind: string) {
   try {
-    await sendText(to, text);
+    await sendText(clinic.wa!, to, text);
   } catch (e) {
     console.error(`[${kind}]`, (e as Error).message);
     return false;
   }
   await appendToChat(patientId, text);
+  await logMessages(clinic.id, patientId, "whatsapp", [{ role: "system", body: text }]);
   return true;
 }
-
-type Clinic = Awaited<ReturnType<typeof loadClinic>>;
 
 async function sendReminders(clinic: Clinic, now: Date, budget: number) {
   const sb = db();
@@ -135,9 +137,10 @@ async function sendReminders(clinic: Clinic, now: Date, budget: number) {
       .select("id");
     if (claimError) throw claimError;
     if (!claimed.length) continue;
-    const patient = v.patients as unknown as { wa_id: string; name: string | null };
+    const patient = v.patients as unknown as { wa_id: string | null; name: string | null };
+    if (!patient.wa_id) continue; // web chat patient: no WhatsApp to remind on. ponytail: email/SMS reminders later
     const text = reminderText({ name: patient.name, service: v.service, startsAt: new Date(v.starts_at), clinic: clinic.name, offsetMin: clinic.utc_offset_minutes });
-    if (await send(patient.wa_id, text, v.patient_id, "reminder")) sent++;
+    if (await send(clinic, patient.wa_id, text, v.patient_id, "reminder")) sent++;
   }
   return sent;
 }
@@ -160,6 +163,7 @@ async function sendFollowups(clinic: Clinic, now: Date, budget: number) {
   const { data: pieces, error } = await sb
     .from("processed_messages")
     .select("patient_wa, created_at")
+    .eq("clinic_id", clinic.id)
     .not("body", "is", null)
     .not("patient_wa", "is", null)
     .gt("created_at", new Date(now.getTime() - 20 * HOUR).toISOString());
@@ -191,16 +195,26 @@ async function sendFollowups(clinic: Clinic, now: Date, budget: number) {
     if (!claimed.length) continue;
     const service = guessService(JSON.stringify(convo.history), clinic.services.map((s) => s.name));
     const slot = await nextFree(clinic, service ?? clinic.services[0]?.name, now);
-    const text = followupText({ name: patient.name, service, slot, clinic: clinic.name });
-    if (await send(wa, text, patient.id, "followup")) sent++;
+    const text = followupText({ name: patient.name, service, slot, clinic: clinic.name, persona: personaName(clinic) });
+    if (await send(clinic, wa, text, patient.id, "followup")) sent++;
   }
   return sent;
 }
 
 export async function runJobs(now = new Date()) {
-  const clinic = await loadClinic();
-  if (quietHours(now, clinic.utc_offset_minutes)) return { reminders: 0, followups: 0, quiet: true };
-  const reminders = await sendReminders(clinic, now, MAX_SENDS);
-  const followups = await sendFollowups(clinic, now, MAX_SENDS - reminders);
-  return { reminders, followups, quiet: false };
+  const total = { clinics: 0, reminders: 0, followups: 0 };
+  for (const clinic of await activeClinics()) {
+    if (!clinic.wa) continue; // WhatsApp not connected yet
+    if (quietHours(now, clinic.utc_offset_minutes)) continue;
+    // One clinic's failure must not stop the others.
+    try {
+      const reminders = await sendReminders(clinic, now, MAX_SENDS);
+      total.followups += await sendFollowups(clinic, now, MAX_SENDS - reminders);
+      total.reminders += reminders;
+      total.clinics++;
+    } catch (e) {
+      console.error(`[cron] ${clinic.slug ?? clinic.id}`, (e as Error).message);
+    }
+  }
+  return total;
 }

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { parseWebhook, secretMatches } from "./whatsapp";
+import { normInstance, parseWebhook, secretMatches } from "./whatsapp";
 
 // Shape based on UltraMsg docs; replace with a real recorded payload after the first live message.
 const payload = (data: Record<string, unknown>, extra: Record<string, unknown> = {}) => ({
@@ -9,27 +9,28 @@ const payload = (data: Record<string, unknown>, extra: Record<string, unknown> =
   ...extra,
 });
 
-test("parses a text message", () => {
-  expect(parseWebhook(payload({}), "12345")).toMatchObject({ from: "971500000000@c.us", type: "chat", body: "Hi", mediaUrl: null });
+test("parses a text message with its instance id", () => {
+  expect(parseWebhook(payload({}))).toMatchObject({ instanceId: "12345", from: "971500000000@c.us", type: "chat", body: "Hi", mediaUrl: null });
 });
 
-test("matches env id 'instance12345' against payload id '12345'", () => {
-  expect(parseWebhook(payload({}), "instance12345")).not.toBeNull();
-  expect(parseWebhook(payload({}), "instance99999")).toBeNull();
-  expect(parseWebhook(payload({}), "")).toBeNull();
+test("instance id is stored and matched without the 'instance' prefix", () => {
+  expect(normInstance("instance12345")).toBe("12345");
+  expect(normInstance("12345")).toBe("12345");
+  expect(parseWebhook(payload({}, { instanceId: "instance12345" }))?.instanceId).toBe("12345");
+  expect(parseWebhook(payload({}, { instanceId: 12345 }))?.instanceId).toBe("12345");
+  expect(parseWebhook(payload({}, { instanceId: undefined }))).toBeNull();
 });
 
 test("keeps media url for image and voice note", () => {
-  expect(parseWebhook(payload({ type: "image", media: "https://x/img.jpg" }), "12345")?.mediaUrl).toBe("https://x/img.jpg");
-  expect(parseWebhook(payload({ type: "ptt", body: "", media: "https://x/v.ogg" }), "12345")?.type).toBe("ptt");
+  expect(parseWebhook(payload({ type: "image", media: "https://x/img.jpg" }))?.mediaUrl).toBe("https://x/img.jpg");
+  expect(parseWebhook(payload({ type: "ptt", body: "", media: "https://x/v.ogg" }))?.type).toBe("ptt");
 });
 
-test("ignores own messages, groups, other events, wrong instance", () => {
-  expect(parseWebhook(payload({ fromMe: true }), "12345")).toBeNull();
-  expect(parseWebhook(payload({ from: "1203630@g.us" }), "12345")).toBeNull();
-  expect(parseWebhook(payload({}, { event_type: "message_ack" }), "12345")).toBeNull();
-  expect(parseWebhook(payload({}), "99999")).toBeNull();
-  expect(parseWebhook(null, "12345")).toBeNull();
+test("ignores own messages, groups, other events", () => {
+  expect(parseWebhook(payload({ fromMe: true }))).toBeNull();
+  expect(parseWebhook(payload({ from: "1203630@g.us" }))).toBeNull();
+  expect(parseWebhook(payload({}, { event_type: "message_ack" }))).toBeNull();
+  expect(parseWebhook(null)).toBeNull();
 });
 
 test("secret check", () => {

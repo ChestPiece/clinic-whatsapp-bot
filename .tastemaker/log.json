@@ -1,0 +1,16 @@
+[
+  {
+    "date": "2026-10-25",
+    "surface": "landing /",
+    "mood": "warm (health, premium-calm)",
+    "macrostructure": "split-studio hero + narrative workflow + ruled ledger + dark close band",
+    "archetypes": { "nav": "wordmark + one text link", "hero": "split, serif headline with italic clay phrase, scripted chat replay right", "feature": "timestamped timeline rows (time | bubble | caption)", "proof": "safety ledger dl rows", "cta": "full-bleed ink band", "footer": "one line, sample-data note" },
+    "arc": ["hook: answered even at 2 a.m.", "how it works: one patient's booking timeline", "trust: safety in code", "close: take the night shift"]
+  },
+  {
+    "date": "2026-10-25",
+    "surface": "chat /chat/[slug]",
+    "track": "app shell",
+    "notes": "greeting typed in, clay patient bubbles, card bubbles for Sara, slot picker lock-in, booked check draw"
+  }
+]

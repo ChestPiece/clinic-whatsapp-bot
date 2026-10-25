@@ -2,20 +2,22 @@
 
 # Clinic WhatsApp Bot
 
-WhatsApp AI receptionist for UAE dental clinics (Dubai first), English + Arabic. Approved plan: `~/.claude/plans/i-want-to-make-tender-wall.md` (Phases 0-6).
+WhatsApp AI receptionist for UAE dental clinics (Dubai first), English + Arabic. Original plan: `~/.claude/plans/i-want-to-make-tender-wall.md`. Earlier roadmap ("revenue receptionist", R0-R8): `~/.claude/plans/check-up-the-whatsapp-ethereal-pearl.md`.
+**Current roadmap (2026-10-25): white-label multi-clinic platform** with web chat widget, staff dashboard (front-desk CRM) and analytics, phases P0-P5: `~/.claude/plans/load-up-the-superwer-cozy-firefly.md`. Per-phase task plans live in `docs/superpowers/plans/`.
 
 ## Decisions
 - WhatsApp via **UltraMsg** (owner's decision, no Meta). Unofficial, so the number can be banned: use a spare SIM, pace sends, no WhatsApp buttons. All provider code lives in `src/lib/whatsapp.ts`.
 - Next.js route handlers (Vercel Hobby). Webhook: `POST /api/whatsapp?secret=WEBHOOK_SECRET`, returns 200 fast, work runs in `after()`.
 - AI: `@openai/agents` (SDK default model, override with `OPENAI_DEFAULT_MODEL`). The LLM never invents slots; it only calls booking tools. Vercel Chat SDK was evaluated and skipped: its WhatsApp adapter is Meta Cloud API only.
-- Data: Supabase. Schema in `supabase/migrations/`, sample clinic in `supabase/seed.sql`; the owner runs SQL in the Supabase SQL editor. One clinic per deployment (`CLINIC_ID`). Synthetic/fake clinic data only, labeled sample. No real patient data until a UAE-region host is in place.
+- Data: Supabase. Schema in `supabase/migrations/`, sample clinic in `supabase/seed.sql`; the owner runs SQL in the Supabase SQL editor. Many clinics per deployment (tenants, since P0). Synthetic/fake clinic data only, labeled sample. No real patient data until a UAE-region host is in place.
 - Safety: no medical advice, emergency reply with the UAE emergency number, never confirm insurance coverage, human handoff, no PHI in logs.
 - Persona "Sara", the clinic receptionist. She admits she is the clinic's virtual assistant if asked. Clinic topics only; off-topic questions get a one-line kind decline and a steer back to booking, never a handoff.
 - No SDK input/output guardrails: each one is an extra model call per message. Scope rules live in the prompt; safety-critical checks are deterministic code.
 
 ## Rules
 - The owner's phone number and all keys stay in `.env.local` only, never in tracked files.
-- Commit only when asked.
+- Commit only when asked. GitHub: `ChestPiece/clinic-whatsapp-bot` (private), branch `master`.
+- Vercel deploys every push to `master` to production. Paste a new migration before pushing code that needs it.
 - Ask before any Supabase write; the owner runs SQL in the SQL editor.
 
 ## Commands
@@ -27,7 +29,7 @@ npm run lint
 
 ## Production
 - Vercel project `chestpieces-projects/clinic-whatsapp-bot`. Public URL: `https://sara-clinic-bot.vercel.app`, added as a project domain through the Vercel API. The default `*-chestpieces-projects.vercel.app` URLs sit behind Vercel deployment protection, which redirects with a 302, so UltraMsg cannot reach them.
-- The UltraMsg webhook points at `https://sara-clinic-bot.vercel.app/api/whatsapp?secret=…`. Deploy with `npx vercel deploy --prod`. Env vars live in Vercel production and in `.env.local`.
+- The UltraMsg webhook points at `https://sara-clinic-bot.vercel.app/api/whatsapp?secret=…`. The GitHub repo is connected, so a push to `master` deploys (`npx vercel deploy --prod` also works). Env vars live in Vercel production and in `.env.local`.
 - Local testing takes webhook traffic away from prod. Point UltraMsg back to prod when done.
 
 ## Local testing
@@ -35,6 +37,20 @@ npm run lint
 - UltraMsg settings: only "Webhook on Received" on, `sendDelay=1`, `sendDelayMax=3`.
 - To reset a test chat, delete its `conversations` row in Supabase.
 - The webhook secret travels in the query string (UltraMsg has no signature header), so it shows in tunnel and Vercel request logs. Rotate it if those logs are ever shared.
+
+## Tenants (P0)
+- Each clinic is a `clinics` row: config (`slug`, `persona`, `staff_whatsapp`, `ultramsg_instance_id` as digits only, `active`). Its UltraMsg token and webhook secret live in `clinic_secrets` (service role only, never read by the dashboard).
+- New clinic: insert a `clinics` row and a `clinic_secrets` row, then point that UltraMsg instance's webhook at `/api/whatsapp?secret=<its webhook_secret>`. One webhook URL serves every clinic: the payload `instanceId` picks the clinic.
+- Env vars `CLINIC_ID`, `ULTRAMSG_INSTANCE_ID`, `ULTRAMSG_TOKEN`, `STAFF_WHATSAPP` and `WEBHOOK_SECRET` are no longer read. `ALLOWED_SENDERS` is still a global env allowlist.
+- Code: `src/lib/clinics.ts` (loaders, 5-min cache), `src/lib/sara.ts` (agent brain shared by all channels: tools, prompt, `runSara`), `src/lib/agent.ts` (WhatsApp channel handler).
+- Every patient/assistant/outbound turn also goes to `messages` (readable transcript for the inbox); token use per run goes to `usage_events`.
+
+## Web chat (P1, first cut)
+- `/chat/[slug]` (shadcn + AI Elements, `useChat`) talks to `POST /api/chat`, which streams the same Sara agent (`streamSara`) through `createAiSdkUiMessageStreamResponse`. History lives server side in `conversations`, like WhatsApp; the client sends only its newest message.
+- Visitor = anonymous id in localStorage, stored as `patients.web_visitor_id` (`wa_id` is null). Sara asks for a mobile number before a web booking or handoff; web handoff alerts staff on WhatsApp with a callback number and does not pause the chat.
+- Tool results are structured (`find_slots`, `book`), so the chat draws tappable time buttons and a booking card.
+- Not yet: embeddable `widget.js` + `allowed_origins` check, per-IP rate limit, chat history after reload, reminders for web patients.
+- UI components are vendored by the shadcn (`new-york`, Radix) and AI Elements CLIs in `src/components/{ui,ai-elements}` and skipped by ESLint.
 
 ## How `handleMessage` works (`src/lib/agent.ts`)
 1. Dedupe insert (`processed_messages`, with `patient_wa`) and clinic load (cached 5 min) in parallel.
@@ -46,21 +62,35 @@ npm run lint
 7. Run the agent, send `tidy(reply)` (no en/em dashes), log `[timing]`, then append this run's turns to the latest saved history (`mergeHistory`) and keep the last 10 turns.
 
 ## Outbound jobs (`src/lib/jobs.ts`, `POST /api/cron?secret=CRON_SECRET`)
-- pg_cron + pg_net call the cron route every 15 min. The schedule SQL is at the bottom of `0003_revenue.sql`.
+- pg_cron + pg_net call the cron route every 15 min (job `clinic-jobs`, live since 2026-10-22). The schedule SQL is at the bottom of `0003_revenue.sql`. Check runs in the Vercel logs (`[cron]` lines) or in `cron.job_run_details`.
 - Reminders: 24h and 2h before a booked visit, in English and Arabic, with "Reply 1 to confirm or 2 to change it". A visit gets no reminder for a window it was booked inside. Each reminder is claimed (`reminded_*_at`) before it is sent, so it goes out at most once. The reminder text is appended to the chat history, so the agent understands the "1" or "2" reply (`confirm_visit` tool; a reschedule clears `confirmed_at`).
 - Follow-up: one nudge when a patient's last message is 3 to 20 h old and they have nothing booked, are not opted out and the chat is not paused. Only one per quiet inquiry (`conversations.followup_sent_at`). The nudge names the last service mentioned in the chat and the next free time. A booking within 48 h of the nudge gets `source='followup'`.
 - STOP (or توقف) as a whole message sets `patients.opted_out`: no follow-up, recall or waitlist messages, but reminders still go out. "الغاء" is not a stop word, because it means "cancel".
 - Outbound limits: no messages between 21:00 and 09:00 clinic time, and at most 20 per run.
 
 Booking limits: at most 3 upcoming visits per patient, and dates up to 60 days ahead. A stored patient name is never overwritten by a later booking.
-Errors: the SORRY reply promises a staff reply only when `STAFF_WHATSAPP` is set; otherwise it gives the clinic phone.
+Errors: the SORRY reply promises a staff reply only when the clinic's `staff_whatsapp` is set; otherwise it gives the clinic phone.
 
-Handoff pauses a chat only when `STAFF_WHATSAPP` is set; without it the bot keeps helping and gives the clinic phone.
+Handoff pauses a chat only when the clinic's `staff_whatsapp` is set; without it the bot keeps helping and gives the clinic phone.
 
 ## Status
 - Phase 0: webhook + `parseWebhook` tests done.
 - Phase 1 done and tested live (book, cancel) on 2026-10-22.
 - Phase 1.5 (natural tone + speed) done and stress-tested live on 2026-10-22: off-topic declines, no dashes, booking with "best one" choice all good. Fixed after that test: double emergency reply, and two replies to a split message.
 - Break-test and hardening on 2026-10-22 (`0002_hardening.sql`): rate limit, input caps, voice URL guard, booking caps, wider EN/AR/Arabizi emergency regex without the "accident last year" false alarm, DB debounce for Vercel, history merge, paused-chat history, honest error reply.
-- 2026-10-22: `0002_hardening.sql` applied, replays re-verified, deployed to Vercel (R0 and R1 of the revenue roadmap in `~/.claude/plans/check-up-the-whatsapp-ethereal-pearl.md`).
-- Next: R2 (reminders + confirm), then R3 follow-up, R4 waitlist + recall, R5 intake, R6 inbox + Sunday report, R7 evals, R8 pitch. Phase 5 evals must include the stress transcripts (off-topic, split messages, "hello?", emergency then "just joking").
+- 2026-10-22: `0002_hardening.sql` applied, replays re-verified, deployed to Vercel (R0, R1).
+- 2026-10-22: R2 reminders + confirm and R3 follow-up + STOP are live (`0003_revenue.sql` applied, cron scheduled).
+- 2026-10-25: P0 multi-tenant foundation coded (`0004_tenants.sql`, not yet applied). Needs Anas to paste 0004 plus its backfill block before the next deploy.
+- 2026-10-25: web chat first cut coded (`/chat/sample-smile`). 0004 now also adds `patients.web_visitor_id` and `phone`.
+- **Demo freeze (2026-10-22):** the owner judged the current bot enough to demo to leads and gather feedback. R4 onward is on hold until lead feedback comes in.
+- On hold:
+  - R4 waitlist + recall (`0003` already has the recall columns and `appointments.source`).
+  - R5 intake + insurance docs.
+  - R6 staff inbox + Sunday owner report.
+  - R7 evals. They must include the stress transcripts: off-topic, split messages, "hello?", emergency then "just joking".
+  - R8 pitch kit.
+- Demo limits to know:
+  - The number is UltraMsg on a test SIM, and `ALLOWED_SENDERS` limits who gets answers.
+  - Staff and owner alerts go to the test number.
+  - Images get a "can't view" reply.
+  - Only one chair per clinic is supported.

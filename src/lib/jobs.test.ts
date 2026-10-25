@@ -73,3 +73,10 @@ test("a booking within 48 hours of a follow-up counts as won by the follow-up", 
   expect(bookingSource("2026-10-19T12:00:00Z", now)).toBe("chat");
   expect(bookingSource(null, now)).toBe("chat");
 });
+
+test("the follow-up uses the clinic's assistant name", () => {
+  const base = { name: null, service: null, slot: null, clinic: "X" };
+  expect(followupText(base)).toContain("it's Sara from X");
+  expect(followupText(base)).toContain("سارة");
+  expect(followupText({ ...base, persona: "Layla" })).toContain("it's Layla from X");
+});

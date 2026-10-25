@@ -10,20 +10,25 @@ export type IncomingMessage = {
   pushname: string;
 };
 
-const base = () => `https://api.ultramsg.com/${process.env.ULTRAMSG_INSTANCE_ID}`;
+// Each clinic has its own UltraMsg instance.
+export type WaCreds = { instanceId: string; token: string };
 
-// Returns null for anything we must not answer: other events, our own sends, groups, wrong instance.
-export function parseWebhook(payload: unknown, instanceId: string): IncomingMessage | null {
+// Dashboard/API id is "instance12345", webhook payload sends "12345". Stored and compared as digits.
+export const normInstance = (id: string) => id.replace(/^instance/, "");
+
+// Returns null for anything we must not answer: other events, our own sends, groups, no instance.
+// The caller finds the clinic by instanceId.
+export function parseWebhook(payload: unknown): (IncomingMessage & { instanceId: string }) | null {
   const p = payload as { event_type?: string; instanceId?: string | number; data?: Record<string, unknown> };
   if (p?.event_type !== "message_received" || !p.data) return null;
-  // Dashboard/API id is "instance12345", webhook payload sends "12345".
-  const id = instanceId.replace(/^instance/, "");
-  if (!id || String(p.instanceId).replace(/^instance/, "") !== id) return null;
+  const instanceId = normInstance(String(p.instanceId ?? ""));
+  if (!instanceId) return null;
   const d = p.data;
   if (d.fromMe === true || d.self === true) return null;
   const from = String(d.from ?? "");
   if (!from.endsWith("@c.us")) return null; // ignore groups (@g.us), status, broadcasts
   return {
+    instanceId,
     id: String(d.id ?? ""),
     from,
     type: String(d.type ?? "chat"),
@@ -40,20 +45,20 @@ export function secretMatches(given: string | null, expected: string | undefined
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-async function post(path: string, fields: Record<string, string>) {
-  const res = await fetch(`${base()}${path}`, {
+async function post(creds: WaCreds, path: string, fields: Record<string, string>) {
+  const res = await fetch(`https://api.ultramsg.com/instance${creds.instanceId}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ token: process.env.ULTRAMSG_TOKEN ?? "", ...fields }),
+    body: new URLSearchParams({ token: creds.token, ...fields }),
   });
   if (!res.ok) throw new Error(`UltraMsg ${path} failed: ${res.status}`);
   return res.json();
 }
 
-export const sendText = (to: string, body: string) => post("/messages/chat", { to, body });
+export const sendText = (creds: WaCreds, to: string, body: string) => post(creds, "/messages/chat", { to, body });
 
 // Blue ticks, so the patient sees the message was read while the reply is prepared. UltraMsg has no typing indicator.
-export const markRead = (chatId: string) => post("/chats/read", { chatId });
+export const markRead = (creds: WaCreds, chatId: string) => post(creds, "/chats/read", { chatId });
 
-export const sendMedia = (to: string, imageUrl: string, caption = "") =>
-  post("/messages/image", { to, image: imageUrl, caption });
+export const sendMedia = (creds: WaCreds, to: string, imageUrl: string, caption = "") =>
+  post(creds, "/messages/image", { to, image: imageUrl, caption });

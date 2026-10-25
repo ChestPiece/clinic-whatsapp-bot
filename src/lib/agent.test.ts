@@ -1,6 +1,7 @@
 import { user, type AgentInputItem, type RunItem } from "@openai/agents";
 import { expect, test } from "vitest";
-import { capText, mergeHistory, safeMediaUrl, sorry, stillPaused, tidy, tooFar, trimHistory, wroteData } from "./agent";
+import { capText, mergeHistory, safeMediaUrl, sorry, stillPaused, tidy, trimHistory } from "./agent";
+import { tooFar, wroteData } from "./sara";
 import { isEmergency } from "./safety";
 
 test("trimHistory keeps the last N turns and starts at a user message", () => {

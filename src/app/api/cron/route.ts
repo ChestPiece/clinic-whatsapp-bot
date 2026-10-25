@@ -6,6 +6,6 @@ export async function POST(request: Request) {
   const secret = new URL(request.url).searchParams.get("secret");
   if (!secretMatches(secret, process.env.CRON_SECRET)) return new Response("forbidden", { status: 403 });
   const result = await runJobs();
-  console.log(`[cron] reminders=${result.reminders} followups=${result.followups} quiet=${result.quiet}`);
+  console.log(`[cron] clinics=${result.clinics} reminders=${result.reminders} followups=${result.followups}`);
   return Response.json(result);
 }

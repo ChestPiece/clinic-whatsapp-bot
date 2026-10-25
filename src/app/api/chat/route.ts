@@ -1,0 +1,96 @@
+// The web chat channel: streams Sara's reply (text plus tool calls) to the AI SDK useChat client.
+import { assistant, user, type AgentInputItem } from "@openai/agents";
+import { createAiSdkUiMessageStreamResponse } from "@openai/agents-extensions/ai-sdk-ui";
+import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
+import { after } from "next/server";
+import { z } from "zod";
+import { capText, RATE_MAX, RATE_WINDOW_MS, slowDown, sorry, trimHistory } from "@/lib/agent";
+import { clinicBySlug } from "@/lib/clinics";
+import { db, logMessages, logUsage } from "@/lib/db";
+import { emergencyReply, isEmergency } from "@/lib/safety";
+import { streamSara } from "@/lib/sara";
+
+export const maxDuration = 60;
+
+// The client sends only its newest message; the history lives server side (conversations.history), like WhatsApp.
+const Body = z.object({
+  slug: z.string().max(64),
+  visitorId: z.uuid(),
+  message: z.object({ role: z.literal("user"), parts: z.array(z.object({ type: z.string(), text: z.string().optional() })) }),
+});
+
+// A fixed reply in the same stream format, for answers the model must not write (emergency, rate limit, errors).
+const fixed = (text: string) =>
+  createUIMessageStreamResponse({
+    stream: createUIMessageStream({
+      execute: ({ writer }) => {
+        writer.write({ type: "text-start", id: "fixed" });
+        writer.write({ type: "text-delta", id: "fixed", delta: text });
+        writer.write({ type: "text-end", id: "fixed" });
+      },
+    }),
+  });
+
+export async function POST(req: Request) {
+  // ponytail: same-origin only while the chat page is ours; the embeddable widget (P1) checks clinic.allowed_origins.
+  const origin = req.headers.get("origin");
+  if (origin && new URL(origin).host !== req.headers.get("host")) return new Response("forbidden", { status: 403 });
+
+  const parsed = Body.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return new Response("bad request", { status: 400 });
+  const { slug, visitorId, message } = parsed.data;
+  const text = capText(message.parts.map((p) => (p.type === "text" ? (p.text ?? "") : "")).join("\n").trim());
+  if (!text) return new Response("empty message", { status: 400 });
+
+  const clinic = await clinicBySlug(slug);
+  if (!clinic?.active) return new Response("not found", { status: 404 });
+
+  const sb = db();
+  const { data: patient, error } = await sb
+    .from("patients")
+    .upsert({ clinic_id: clinic.id, web_visitor_id: visitorId }, { onConflict: "clinic_id,web_visitor_id" })
+    .select("id, name, phone")
+    .single();
+  if (error) throw error;
+
+  // ponytail: per visitor id only; a script rotating ids gets past it. Add a per-IP limit before the widget goes on real sites.
+  const { count } = await sb
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .eq("patient_id", patient.id)
+    .eq("role", "patient")
+    .gt("created_at", new Date(Date.now() - RATE_WINDOW_MS).toISOString());
+  if ((count ?? 0) >= RATE_MAX) return fixed(slowDown(clinic.phone));
+
+  const { data: convo } = await sb.from("conversations").select("history").eq("patient_id", patient.id).maybeSingle();
+  const saved = (convo?.history ?? []) as AgentInputItem[];
+  const save = async (history: AgentInputItem[], reply: string | undefined) => {
+    await logMessages(clinic.id, patient.id, "web", [{ role: "patient", body: text }, ...(reply ? [{ role: "assistant" as const, body: reply }] : [])]);
+    const { error } = await sb.from("conversations").upsert({ patient_id: patient.id, history: trimHistory(history), updated_at: new Date().toISOString() });
+    if (error) console.error("[history]", error.message);
+  };
+
+  // Safety first, same as WhatsApp: a fixed reply, the model does not run.
+  if (isEmergency(text)) {
+    const reply = emergencyReply(text, clinic.phone);
+    after(() => save([...saved, user(text), assistant(reply)], reply));
+    return fixed(reply);
+  }
+
+  try {
+    const result = await streamSara(clinic, patient, [...saved, user(text)]);
+    after(async () => {
+      try {
+        await result.completed;
+        await logUsage(clinic.id, "web", result.state.usage);
+        await save(result.history, result.finalOutput);
+      } catch (e) {
+        console.error("[chat]", (e as Error).message);
+      }
+    });
+    return createAiSdkUiMessageStreamResponse(result);
+  } catch (e) {
+    console.error("[chat]", (e as Error).message);
+    return fixed(sorry(clinic.phone, null));
+  }
+}
