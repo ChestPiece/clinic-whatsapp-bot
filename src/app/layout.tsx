@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Manrope, Readex_Pro } from "next/font/google";
+import { Geist, Geist_Mono, Newsreader, Readex_Pro } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
-// Latin first in the sans stack (globals.css): Manrope has no Arabic glyphs, so Arabic falls through to Readex Pro.
-const manrope = Manrope({
-  variable: "--font-manrope",
+// Latin first in the sans stack (globals.css): Geist has no Arabic glyphs, so Arabic falls through to Readex Pro.
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
 });
 
@@ -14,21 +15,31 @@ const readex = Readex_Pro({
   weight: ["400", "500", "600"],
 });
 
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
-  weight: ["400", "500"],
+});
+
+// Newsreader is only for the "Front Desk." wordmark (the .wordmark utility), never for UI text.
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
-  title: "AI Front Desk",
+  title: "Front Desk",
   description: "AI receptionist for dental clinics: WhatsApp and website chat.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${manrope.variable} ${readex.variable} ${plexMono.variable}`}>
-      <body className="antialiased">{children}</body>
+    <html lang="en" suppressHydrationWarning className={`${geist.variable} ${readex.variable} ${geistMono.variable} ${newsreader.variable}`}>
+      <body className="antialiased" suppressHydrationWarning>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

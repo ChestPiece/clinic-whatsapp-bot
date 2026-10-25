@@ -94,3 +94,24 @@ export async function POST(req: Request) {
     return fixed(sorry(clinic.phone, null));
   }
 }
+
+// Transcript after a reload: the visitor's last messages as plain text (tool cards are not replayed).
+export async function GET(req: Request) {
+  const q = new URL(req.url).searchParams;
+  const visitorId = z.uuid().safeParse(q.get("visitorId"));
+  const clinic = await clinicBySlug(q.get("slug") ?? "");
+  if (!visitorId.success || !clinic?.active) return Response.json([]);
+  const sb = db();
+  const { data: patient } = await sb.from("patients").select("id").eq("clinic_id", clinic.id).eq("web_visitor_id", visitorId.data).maybeSingle();
+  if (!patient) return Response.json([]);
+  const { data } = await sb
+    .from("messages")
+    .select("id, role, body")
+    .eq("patient_id", patient.id)
+    .in("role", ["patient", "assistant", "staff"])
+    .order("id", { ascending: false }) // one save writes patient + reply in the same instant, so order by id
+    .limit(30);
+  return Response.json(
+    (data ?? []).reverse().map((m) => ({ id: `h${m.id}`, role: m.role === "patient" ? "user" : "assistant", parts: [{ type: "text", text: m.body }] })),
+  );
+}

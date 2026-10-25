@@ -5,11 +5,18 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: "Manrope", "Readex Pro", system-ui, sans-serif; /* real faces only: next/font's Arial "Manrope Fallback" has no unicode-range and would catch Arabic */
+    --font-heading: var(--font-serif);
+    --font-sans: "Geist", "Readex Pro", system-ui, sans-serif; /* real faces only: next/font's Arial "Geist Fallback" has no unicode-range and would catch Arabic */
+    --font-serif: var(--font-sans); /* one family everywhere; old font-serif classes fall back to Geist */
+    --color-alert: var(--alert);
+    --color-alert-soft: var(--alert-soft);
+    --color-sage-soft: var(--sage-soft);
+    --color-web: var(--web);
+    --color-web-soft: var(--web-soft);
+    --color-rule: var(--rule);
     --color-success: var(--success);
     --color-success-foreground: var(--success-foreground);
-    --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+    --font-mono: var(--font-geist-mono), ui-monospace, monospace;
     --color-panel: var(--panel);
     --color-sand: var(--sand);
     --color-sidebar-ring: var(--sidebar-ring);
@@ -52,85 +59,104 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Clean neutral UI: stone neutrals, sage (WhatsApp / primary), blue (website), red (needs staff). Contrast contract in .tastemaker/style-lock.md. */
 :root {
-    /* Platform brand "Stone & Sage": tinted stone, ink, sage. Contrast contract in .tastemaker/style-lock.md. */
-    --background: #f4f3ee;
-    --foreground: #1c1917;
+    --background: #fafaf9;
+    --foreground: #0c0a09;
     --card: #ffffff;
-    --card-foreground: #1c1917;
+    --card-foreground: #0c0a09;
     --popover: #ffffff;
-    --popover-foreground: #1c1917;
+    --popover-foreground: #0c0a09;
     --primary: #4f6f5c;
     --primary-foreground: #ffffff;
-    --secondary: #eae8e1;
-    --secondary-foreground: #1c1917;
-    --muted: #eae8e1;
-    --muted-foreground: #57534e;
-    --accent: #e8efea;
+    --secondary: #f5f5f4;
+    --secondary-foreground: #0c0a09;
+    --muted: #f5f5f4;
+    --muted-foreground: #6b6560;
+    --accent: #eef3ef;
     --accent-foreground: #3e5a49;
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: #ad4320;
+    --alert: #ad4320;
+    --alert-soft: #f4dccf;
+    --sage-soft: #dfe8df;
+    --web: #33506e;
+    --web-soft: #dbe3eb;
     --success: #4f6f5c;
     --success-foreground: #ffffff;
     --border: #e7e5e4;
-    --input: #dedbd4;
+    --rule: #f0eeec;
+    --input: #e7e5e4;
     --ring: color-mix(in oklab, #4f6f5c 55%, transparent);
-    --panel: #eae8e1;
+    --panel: #f5f5f4;
     --sand: #e9c9a8;
     --chart-1: #4f6f5c;
-    --chart-2: #e9c9a8;
-    --chart-3: #8aa595;
-    --chart-4: #57534e;
-    --chart-5: #1c1917;
-    --radius: 0.875rem;
-    --sidebar: #eae8e1;
-    --sidebar-foreground: #1c1917;
+    --chart-2: #33506e;
+    --chart-3: #ad4320;
+    --chart-4: #6b6560;
+    --chart-5: #0c0a09;
+    --radius: 0.75rem;
+    --sidebar: #f5f5f4;
+    --sidebar-foreground: #0c0a09;
     --sidebar-primary: #4f6f5c;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #e8efea;
-    --sidebar-accent-foreground: #3e5a49;
+    --sidebar-accent: #e7e5e4;
+    --sidebar-accent-foreground: #0c0a09;
     --sidebar-border: #e7e5e4;
     --sidebar-ring: color-mix(in oklab, #4f6f5c 55%, transparent);
+    --shadow-slip: 0 1px 2px rgb(12 10 9 / 0.05);
 
     /* Motion tokens */
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ease-loop: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     --dur-press: 120ms;
     --dur-pop: 180ms;
     --dur-panel: 240ms;
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --background: #0c0a09;
+    --foreground: #f5f5f4;
+    --card: #171412;
+    --card-foreground: #f5f5f4;
+    --popover: #171412;
+    --popover-foreground: #f5f5f4;
+    --primary: #93b59d;
+    --primary-foreground: #0c0a09;
+    --secondary: #1f1c1a;
+    --secondary-foreground: #f5f5f4;
+    --muted: #1f1c1a;
+    --muted-foreground: #a8a29e;
+    --accent: #22302a;
+    --accent-foreground: #b5d0bc;
+    --destructive: #e8825f;
+    --alert: #e8825f;
+    --alert-soft: #3d2219;
+    --sage-soft: #22302a;
+    --web: #93aecb;
+    --web-soft: #1f2a36;
+    --success: #93b59d;
+    --success-foreground: #17150f;
+    --border: #292524;
+    --rule: #1f1c1a;
+    --input: #292524;
+    --ring: color-mix(in oklab, #93b59d 55%, transparent);
+    --panel: #1f1c1a;
+    --sand: #6b5440;
+    --chart-1: #93b59d;
+    --chart-2: #93aecb;
+    --chart-3: #e8825f;
+    --chart-4: #a59c8b;
+    --chart-5: #f5f5f4;
+    --sidebar: #110f0e;
+    --sidebar-foreground: #f5f5f4;
+    --sidebar-primary: #93b59d;
+    --sidebar-primary-foreground: #17150f;
+    --sidebar-accent: #1f1c1a;
+    --sidebar-accent-foreground: #f5f5f4;
+    --sidebar-border: #292524;
+    --sidebar-ring: color-mix(in oklab, #93b59d 55%, transparent);
+    --shadow-slip: 0 1px 2px rgb(0 0 0 / 0.4);
 }
 
 @layer base {
@@ -171,18 +197,13 @@
 }
 .typing-dot { animation: typing 1.2s var(--ease-loop) infinite; }
 
-/* Background washes: two blurred colour fields (sage, sand) plus a faint dot grid. Decorative only. */
-.wash { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.wash::before, .wash::after { content: ""; position: absolute; border-radius: 9999px; filter: blur(80px); }
-.wash::before { width: 620px; height: 620px; left: -160px; top: -180px; background: color-mix(in oklab, var(--primary) 22%, transparent); }
-.wash::after { width: 560px; height: 560px; right: -160px; top: 60px; background: color-mix(in oklab, var(--sand) 55%, transparent); }
-.wash-soft::before, .wash-soft::after { opacity: 0.6; }
-.dots {
-  position: absolute; inset: 0; pointer-events: none;
-  background-image: radial-gradient(color-mix(in oklab, var(--foreground) 9%, transparent) 1px, transparent 1px);
-  background-size: 22px 22px;
-  mask-image: radial-gradient(ellipse at 50% 30%, black, transparent 70%);
-}
+/* Card surface (kept name so dashboard markup still works). */
+@utility slip { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-slip); }
+@utility wordmark { font-family: var(--font-newsreader), Georgia, serif; font-weight: 400; letter-spacing: -0.02em; } /* the logo, and nothing else */
+@utility torn-top { position: relative; } /* old paper edge, now a no-op */
+@keyframes blink { 50% { opacity: 0; } }
+.caret { display: inline-block; width: 7px; height: 1em; background: var(--primary); vertical-align: -2px; margin-inline-start: 1px; animation: blink 0.9s steps(1) infinite; }
+.label { font-size: 12px; font-weight: 500; letter-spacing: 0; color: var(--muted-foreground); }
 
 /* Slow drift for the hero product only. */
 @keyframes drift { 50% { transform: translateY(-6px); } }

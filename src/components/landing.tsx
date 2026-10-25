@@ -25,12 +25,12 @@ export function HeroConversation() {
   const typing = at === 2 || at === 5 || at === 8;
 
   return (
-    <figure className="drift relative mx-auto w-full max-w-[400px]">
-      <div className="overflow-hidden rounded-[28px] bg-card ring-1 ring-border shadow-[0_40px_80px_-40px_rgb(28_25_23/0.4)]">
+    <figure className="relative mx-auto w-full max-w-[400px]">
+      <div className="relative overflow-hidden rounded-2xl border bg-card shadow-xl shadow-black/5">
         <div className="flex items-center gap-3 border-b px-4 py-3">
-          <div aria-hidden className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">S</div>
+          <div aria-hidden className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">S</div>
           <div className="leading-tight">
-            <div className="text-sm font-semibold">Sample Smile Dental</div>
+            <div className="text-sm font-medium">Sample Smile Dental</div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <span className="relative flex size-1.5">
                 <span className="online-ring absolute inset-0 rounded-full bg-success" />
@@ -39,11 +39,11 @@ export function HeroConversation() {
               Sara, virtual receptionist
             </div>
           </div>
-          <span className="ms-auto font-mono text-xs tabular-nums text-muted-foreground">23:40</span>
+          <span className="ms-auto text-xs tabular-nums text-muted-foreground">23:40</span>
         </div>
 
         {/* Decorative replay of a real flow; inert so keyboard users skip it. */}
-        <div inert className="flex h-[470px] flex-col justify-end gap-3 overflow-hidden p-4 text-sm [mask-image:linear-gradient(to_bottom,transparent,black_24px)]">
+        <div inert className="flex h-[440px] flex-col justify-end gap-3 overflow-hidden p-4 text-sm [mask-image:linear-gradient(to_bottom,transparent,black_24px)]">
           <AnimatePresence initial={false}>
             {at >= 1 && (
               <Line key="p1">
@@ -90,7 +90,6 @@ export function HeroConversation() {
           </AnimatePresence>
         </div>
       </div>
-      <figcaption className="mt-3 text-center text-xs text-muted-foreground">Sample conversation, replayed</figcaption>
     </figure>
   );
 }

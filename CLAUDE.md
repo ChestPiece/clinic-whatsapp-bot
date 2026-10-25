@@ -49,8 +49,25 @@ npm run lint
 - `/chat/[slug]` (shadcn + AI Elements, `useChat`) talks to `POST /api/chat`, which streams the same Sara agent (`streamSara`) through `createAiSdkUiMessageStreamResponse`. History lives server side in `conversations`, like WhatsApp; the client sends only its newest message.
 - Visitor = anonymous id in localStorage, stored as `patients.web_visitor_id` (`wa_id` is null). Sara asks for a mobile number before a web booking or handoff; web handoff alerts staff on WhatsApp with a callback number and does not pause the chat.
 - Tool results are structured (`find_slots`, `book`), so the chat draws tappable time buttons and a booking card.
-- Not yet: embeddable `widget.js` + `allowed_origins` check, per-IP rate limit, chat history after reload, reminders for web patients.
+- Chat history comes back after a reload (`GET /api/chat`). Not yet: embeddable `widget.js` + `allowed_origins` check, per-IP rate limit, reminders for web patients.
 - UI components are vendored by the shadcn (`new-york`, Radix) and AI Elements CLIs in `src/components/{ui,ai-elements}` and skipped by ESLint.
+
+## Design (clean SaaS, 2026-10-25, replaces "The Ledger")
+- **Brand guidelines are locked in `.tastemaker/style-lock.md`. Read it before any UI work and follow it; change it only when Anas asks.**
+- Neutral stone palette + sage `--primary`, blue `--web`, red `--alert` (tokens in `src/app/globals.css`). Geist (UI + headings), Geist Mono (sparing), Readex Pro for Arabic. No paper texture. `.slip` now means a plain card; `.torn-top` is a no-op kept for old dashboard markup.
+- Logo: the `Front Desk.` wordmark (Newsreader, red full stop). Always use `<Logo />` from `src/components/logo.tsx`; Newsreader is loaded only for it (`.wordmark` utility).
+- Chat: left collapsible sidebar (Back to site, New chat, clinic hours/services/location in `<details>`), left sheet on phones. Landing: floating navbar, hero + chat replay, features, how it works, safety, CTA.
+- Shared pieces in `src/components/ledger.tsx`: `WeekCalendar`, `Tally`, `Typed`, `Line`, `ThemeToggle`.
+
+## Staff dashboard (P2)
+- `0005_dashboard.sql` (applied 2026-10-25): `memberships`, `platform_admins`, `is_member()`, RLS read/update policies, staff-only message inserts, Realtime on messages/conversations/appointments. Its header says how to add a staff user.
+- Auth: `@supabase/ssr`, `src/proxy.ts` guards `/dashboard`, `/login` (password or magic link, no sign-up). Needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local` and Vercel.
+- Pages read with the user's client (RLS). Helpers in `src/lib/dashboard.ts`, server actions in `src/app/dashboard/actions.ts`. Clinic switcher (cookie) when a user has several clinics.
+  - Today: tallies (booked by Sara this week, after hours, need staff), first waiting chat, this week's book.
+  - Inbox: chats from `messages`, Needs staff filter (`stillPaused`), Take over / Hand back, staff reply on WhatsApp (sent with the clinic's creds via the service role, logged as role `staff`, appended to the agent history). Website chats are read-only.
+  - Calendar: Saturday-start week, blocks by channel (red = chat waiting for staff), mark came in / no-show / cancel.
+  - Patients: search + tags, profile with details, staff notes, visits, transcript.
+- `Live` re-renders pages on Realtime changes. Not yet: manual booking or moving visits from the dashboard, live replies into web chats.
 
 ## How `handleMessage` works (`src/lib/agent.ts`)
 1. Dedupe insert (`processed_messages`, with `patient_wa`) and clinic load (cached 5 min) in parallel.
@@ -83,6 +100,7 @@ Handoff pauses a chat only when the clinic's `staff_whatsapp` is set; without it
 - 2026-10-25: P0 multi-tenant foundation done (`0004_tenants.sql` applied with its backfill block, deployed in 7d410b3).
 - 2026-10-25: web chat first cut coded (`/chat/sample-smile`). 0004 now also adds `patients.web_visitor_id` and `phone`.
 - 2026-10-25: landing page and web chat redesigned ("Stone & Sage": Manrope + Readex Pro, stone background with sage/sand washes, full-screen chat with a clinic info sidebar). Tokens and rules in `.tastemaker/style-lock.md`. Deployed in 7d410b3.
+- 2026-10-25: Ledger design on the whole app; P2 dashboard coded (not committed or deployed yet).
 - **Demo freeze (2026-10-22):** the owner judged the current bot enough to demo to leads and gather feedback. R4 onward is on hold until lead feedback comes in.
 - On hold:
   - R4 waitlist + recall (`0003` already has the recall columns and `appointments.source`).

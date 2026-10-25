@@ -1,19 +1,12 @@
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, CalendarCheckIcon, LanguagesIcon, LayoutDashboardIcon, MessageCircleIcon, ShieldCheckIcon, SirenIcon, StethoscopeIcon, UserRoundIcon } from "lucide-react";
+import { Logo } from "@/components/logo";
 import Link from "next/link";
-import { Bubble, PatientBubble } from "@/components/chat-cards";
 import { HeroConversation, Reveal } from "@/components/landing";
+import { ThemeToggle, WeekCalendar, type Block } from "@/components/ledger";
 import { Button } from "@/components/ui/button";
 
 // ponytail: "Front Desk" is a placeholder name until the product name is decided (P3).
 const DEMO = "/chat/sample-smile";
-
-// One patient's booking, start to finish. Every step is a feature that ships today.
-const NIGHT = [
-  { when: "Tue 23:40", who: "patient", text: "Hi, anything free Thursday evening?", note: "The clinic is closed. Sara answers anyway, in English or Arabic." },
-  { when: "Tue 23:41", who: "sara", text: "Booked: cleaning & polish, Thu 29 Oct at 6:30 pm.", note: "Real free slots from the clinic's hours. Never a double booking." },
-  { when: "Wed 18:30", who: "sara", text: "Reminder: your visit is tomorrow at 6:30 pm. Reply 1 to confirm or 2 to change it.", note: "24 hours before, then again 2 hours before." },
-  { when: "Wed 18:32", who: "patient", text: "1", note: "Confirmed. One less empty chair." },
-] as const;
 
 const SAFETY = [
   { title: "No medical advice", text: "Sara books visits and answers clinic questions. Anything clinical goes to your team." },
@@ -22,149 +15,189 @@ const SAFETY = [
   { title: "No promises on cover", text: "Insurance questions get your list of accepted insurers, never a coverage guarantee." },
 ];
 
-function Mark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path d="M4 13c0-5 3.5-9 8-9s8 4 8 9" stroke="var(--primary)" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-      <circle cx="12" cy="16" r="4" fill="currentColor" />
-    </svg>
-  );
-}
+// Sample week for the desk preview (UAE week starts Saturday). No real patients.
+const DAYS = [
+  { label: "Sat", date: 24 },
+  { label: "Sun", date: 25 },
+  { label: "Mon", date: 26 },
+  { label: "Tue", date: 27, today: true },
+  { label: "Wed", date: 28 },
+  { label: "Thu", date: 29 },
+];
+const BLOCKS: Block[] = [
+  { id: "1", day: 0, start: 9.5, end: 10.5, title: "Check-up", name: "Omar M.", kind: "wa" },
+  { id: "2", day: 1, start: 11, end: 11.75, title: "Cleaning", name: "Sophie R.", kind: "web" },
+  { id: "3", day: 0, start: 14, end: 15.5, title: "Root canal", name: "Ahmed K.", kind: "wa" },
+  { id: "4", day: 2, start: 10, end: 11, title: "Kids visit", name: "Mira S.", kind: "web" },
+  { id: "5", day: 4, start: 16, end: 17, title: "Lost crown", name: "Nadia P.", kind: "staff" },
+  { id: "6", day: 2, start: 15, end: 15.75, title: "Cleaning", name: "Hassan A.", kind: "wa" },
+  { id: "7", day: 3, start: 12, end: 12.75, title: "Cleaning", name: "Rania T.", kind: "wa" },
+  { id: "8", day: 5, start: 18.5, end: 19.5, title: "Cleaning", name: "Layla H.", kind: "wa" },
+];
 
-const label = "font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground";
+const FEATURES = [
+  { icon: CalendarCheckIcon, title: "Books real free times", text: "Sara reads your clinic hours and offers only open slots. She books, moves and cancels visits, and never double books." },
+  { icon: LanguagesIcon, title: "English and Arabic", text: "Patients write the way they talk, in English, Arabic or Arabizi. Sara answers in the same language." },
+  { icon: MessageCircleIcon, title: "WhatsApp and your website", text: "One receptionist for both channels. Every chat and booking lands in the same staff inbox." },
+];
+
+const STEPS = [
+  { title: "A patient messages", text: "At 11 pm on a Tuesday: “anything free Thursday evening?” The clinic is closed. Sara answers." },
+  { title: "Sara offers real slots", text: "Free times from your book, a tap to pick one, and a booking card with the address." },
+  { title: "Reminders do the rest", text: "A reminder 24 hours and 2 hours before. Reply 1 to confirm or 2 to change it." },
+];
+
+const SAFETY_ICONS = [StethoscopeIcon, SirenIcon, UserRoundIcon, ShieldCheckIcon];
+
+const Container = ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={`mx-auto w-full max-w-6xl px-4 sm:px-6 ${className ?? ""}`}>{children}</div>;
+
+const Heading = ({ eyebrow, title, text }: { eyebrow: string; title: string; text?: string }) => (
+  <div className="max-w-2xl">
+    <p className="text-sm font-medium text-primary">{eyebrow}</p>
+    <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{title}</h2>
+    {text && <p className="mt-4 text-pretty text-muted-foreground">{text}</p>}
+  </div>
+);
 
 export default function Home() {
   return (
     <div className="min-h-dvh">
-      <section className="relative overflow-hidden">
-        <div aria-hidden className="wash" />
-        <div aria-hidden className="dots" />
-        <header className="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-8">
-          <span className="flex items-center gap-2 text-[17px] font-bold tracking-tight">
-            <Mark className="size-6" /> Front Desk
-          </span>
-          <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
-            <a href="#night" className="hover:text-foreground">How it works</a>
-            <a href="#safety" className="hover:text-foreground">Safety</a>
-          </nav>
-          <Button asChild size="sm" className="rounded-full bg-foreground px-4 text-background hover:bg-foreground/90">
-            <Link href={DEMO}>Try the demo</Link>
-          </Button>
-        </header>
-
-        <div className="relative mx-auto max-w-4xl px-4 pt-14 text-center sm:px-8 sm:pt-20">
-          <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3.5 py-1.5 text-[13px] font-medium text-accent-foreground">
-              <span className="size-1.5 rounded-full bg-primary" /> Answering in English and <span dir="rtl">عربي</span>
-            </span>
-          </Reveal>
-          <Reveal delay={0.06}>
-            <h1 className="mt-7 text-[clamp(2.6rem,7vw,4.4rem)] font-extrabold leading-[1.02] tracking-[-0.04em] text-balance">
-              Every patient message answered, <span className="text-primary">even at 2&nbsp;a.m.</span>
-            </h1>
-          </Reveal>
-          <Reveal delay={0.12}>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty">
-              An AI receptionist for dental clinics. It books, moves and cancels visits on WhatsApp and your website.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <Button asChild size="lg" className="h-12 rounded-full px-6 text-base font-semibold">
-                <Link href={DEMO}>
-                  Try the demo chat <ArrowRightIcon className="size-4" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="ghost" className="h-12 rounded-full px-5 text-base font-semibold hover:bg-panel">
-                <a href="#night">See how it works</a>
-              </Button>
-            </div>
-          </Reveal>
-        </div>
-
-        <div className="relative mx-auto mt-16 max-w-6xl px-4 pb-24 sm:mt-20 sm:px-8 sm:pb-28">
-          <div aria-hidden className="absolute inset-x-4 bottom-12 top-24 rounded-[36px] bg-gradient-to-b from-card/70 to-panel/80 ring-1 ring-card/60 backdrop-blur-sm sm:inset-x-8" />
-          <div className="relative grid items-start gap-6 md:grid-cols-[1fr_400px_1fr]">
-            <Reveal delay={0.9} className="mt-40 hidden rounded-2xl bg-card p-4 shadow-[0_20px_40px_-24px_rgb(28_25_23/0.3)] md:block">
-              <div className={label}>Reminder · 24 h before</div>
-              <p className="mt-2 text-sm">Your visit is tomorrow at 6:30 pm. Reply 1 to confirm or 2 to change it.</p>
-              <span className="mt-3 inline-flex rounded-full bg-accent px-2.5 py-1 font-mono text-xs text-accent-foreground">Patient replied “1” ✓</span>
-            </Reveal>
-            <HeroConversation />
-            <Reveal delay={1.3} className="mt-24 hidden rounded-2xl bg-card p-4 shadow-[0_20px_40px_-24px_rgb(28_25_23/0.3)] md:block">
-              <div className={label}>Safety</div>
-              <p className="mt-2 text-sm">
-                “I can&apos;t breathe” gets the UAE emergency number, <b>998</b>, before anything else.
-              </p>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      <section id="night" className="border-y bg-card py-28 sm:py-36">
-        <div className="mx-auto max-w-4xl px-4 sm:px-8">
-          <Reveal>
-            <p className={label}>How a booking runs</p>
-            <h2 className="mt-4 max-w-xl text-4xl font-extrabold leading-[1.08] tracking-[-0.03em] sm:text-5xl">One patient&apos;s booking, while your desk is closed.</h2>
-          </Reveal>
-          <ol className="mt-16 flex flex-col">
-            {NIGHT.map((s, i) => (
-              <li key={s.when}>
-                <Reveal delay={i * 0.05} className="grid gap-3 border-t py-7 sm:grid-cols-[7rem_1fr_14rem] sm:items-center sm:gap-8">
-                  <span className="font-mono text-xs tabular-nums text-muted-foreground">{s.when}</span>
-                  <div className="text-sm">{s.who === "patient" ? <PatientBubble>{s.text}</PatientBubble> : <Bubble>{s.text}</Bubble>}</div>
-                  <p className="text-sm text-muted-foreground">{s.note}</p>
-                </Reveal>
-              </li>
+      <header className="sticky top-0 z-20 px-4 pt-3 sm:px-6">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl border bg-card/80 ps-4 pe-2 shadow-sm backdrop-blur-md">
+          <Link href="/" aria-label="Front Desk home">
+            <Logo />
+          </Link>
+          <nav className="flex items-center gap-1 text-sm">
+            {[
+              ["#features", "Features"],
+              ["#how", "How it works"],
+              ["#safety", "Safety"],
+            ].map(([href, text]) => (
+              <a key={href} href={href} className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:inline">
+                {text}
+              </a>
             ))}
-          </ol>
-          <Reveal>
-            <p className="mt-10 max-w-xl text-sm text-muted-foreground">
-              Didn&apos;t book? One gentle follow-up the next day, naming the next free time. Replying STOP turns follow-ups off.
-            </p>
-          </Reveal>
+            <span aria-hidden className="mx-2 hidden h-5 w-px bg-border md:block" />
+            <Link href="/login" className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              Sign in
+            </Link>
+            <Button asChild size="sm" className="ms-1 hidden h-9 rounded-xl px-4 sm:inline-flex">
+              <Link href={DEMO}>
+                Try the demo <ArrowRightIcon className="size-3.5" />
+              </Link>
+            </Button>
+          </nav>
         </div>
-      </section>
+      </header>
 
-      <section id="safety" className="py-28 sm:py-36">
-        <div className="mx-auto grid max-w-6xl gap-12 px-4 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <Reveal>
-            <p className={label}>Safety</p>
-            <h2 className="mt-4 text-4xl font-extrabold leading-[1.08] tracking-[-0.03em] sm:text-5xl">
-              Careful by design, <span className="text-primary">not by prompt.</span>
-            </h2>
-            <p className="mt-5 max-w-sm text-muted-foreground">The safety checks are plain code that runs before the AI does, so they hold on every message.</p>
-          </Reveal>
-          <dl className="grid gap-3 sm:grid-cols-2">
-            {SAFETY.map((s, i) => (
-              <Reveal key={s.title} delay={i * 0.05} className="rounded-[22px] bg-card p-6">
-                <dt className="font-bold">{s.title}</dt>
-                <dd className="mt-2 text-muted-foreground">{s.text}</dd>
+      <Container className="grid items-center gap-12 pb-16 pt-12 sm:pb-20 sm:pt-16 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+        <Reveal>
+          <p className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-success" /> For dental clinics in the UAE
+          </p>
+          <h1 className="mt-6 max-w-[18ch] text-4xl font-semibold leading-[1.05] tracking-[-0.035em] text-balance sm:text-5xl lg:text-[3.5rem]">An AI receptionist that books patients around the clock.</h1>
+          <p className="mt-5 max-w-[46ch] text-lg text-pretty text-muted-foreground">
+            Sara answers on WhatsApp and your website, in English and <span dir="rtl">عربي</span>. She books, moves and cancels visits, and sends the reminders.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <Link href={DEMO}>
+                Try the demo chat <ArrowRightIcon className="size-4" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="bg-card">
+              <a href="#how">See how it works</a>
+            </Button>
+          </div>
+        </Reveal>
+        <HeroConversation />
+      </Container>
+
+      <section id="features" className="border-t bg-card/50 py-20">
+        <Container>
+          <Heading eyebrow="Features" title="Everything your front desk does after hours." />
+          <div className="mt-12 grid gap-4 md:grid-cols-3">
+            {FEATURES.map((f, i) => (
+              <Reveal key={f.title} delay={i * 0.05} className="rounded-xl border bg-card p-6">
+                <f.icon className="size-5 text-primary" />
+                <h3 className="mt-4 font-semibold">{f.title}</h3>
+                <p className="mt-2 text-sm text-pretty text-muted-foreground">{f.text}</p>
               </Reveal>
             ))}
-          </dl>
-        </div>
+          </div>
+          <Reveal className="mt-4 grid gap-6 rounded-xl border bg-card p-6 lg:grid-cols-[18rem_1fr] lg:items-center">
+            <div>
+              <LayoutDashboardIcon className="size-5 text-primary" />
+              <h3 className="mt-4 font-semibold">Your staff see the week, not a chat feed</h3>
+              <p className="mt-2 text-sm text-pretty text-muted-foreground">Each booking lands on the calendar. Chats that need a person show up red, so nothing waits.</p>
+            </div>
+            <WeekCalendar title="Week of 24 October" days={DAYS} blocks={BLOCKS} to={20} now={{ day: 3, hour: 13.4 }} />
+          </Reveal>
+        </Container>
       </section>
 
-      <section className="px-4 pb-6 sm:px-8">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[36px] bg-foreground px-6 py-20 text-background sm:px-14 sm:py-24">
-          <div aria-hidden className="wash wash-soft" />
-          <div className="relative flex flex-col items-start gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <Reveal>
-              <h2 className="max-w-2xl text-5xl font-extrabold leading-[1.04] tracking-[-0.04em] sm:text-6xl">Let Sara take the night shift.</h2>
-            </Reveal>
-            <Button asChild size="lg" className="h-12 rounded-full px-6 text-base font-semibold">
+      <section id="how" className="border-t py-20">
+        <Container>
+          <Heading eyebrow="How it works" title="One booking, while your desk is closed." />
+          <ol className="mt-12 grid gap-4 md:grid-cols-3">
+            {STEPS.map((s, i) => (
+              <Reveal key={s.title} delay={i * 0.05} className="rounded-xl border bg-card p-6">
+                <span className="flex size-8 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-foreground">{i + 1}</span>
+                <h3 className="mt-4 font-semibold">{s.title}</h3>
+                <p className="mt-2 text-sm text-pretty text-muted-foreground">{s.text}</p>
+              </Reveal>
+            ))}
+          </ol>
+          <p className="mt-6 text-sm text-muted-foreground">No booking? One gentle follow-up the next day. Replying STOP turns follow-ups off.</p>
+        </Container>
+      </section>
+
+      <section id="safety" className="border-t bg-card/50 py-20">
+        <Container className="grid gap-12 lg:grid-cols-[1fr_1.4fr]">
+          <Heading eyebrow="Safety" title="Careful by design." text="The safety checks are plain code that runs before the AI does, so they hold on every message." />
+          <dl className="grid gap-x-8 gap-y-8 sm:grid-cols-2">
+            {SAFETY.map((s, i) => {
+              const Icon = SAFETY_ICONS[i];
+              return (
+                <div key={s.title} className="flex gap-4">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-card">
+                    <Icon className="size-4 text-primary" />
+                  </span>
+                  <div>
+                    <dt className="font-semibold">{s.title}</dt>
+                    <dd className="mt-1 text-sm text-pretty text-muted-foreground">{s.text}</dd>
+                  </div>
+                </div>
+              );
+            })}
+          </dl>
+        </Container>
+      </section>
+
+      <section className="border-t py-20">
+        <Container>
+          <div className="flex flex-col items-start gap-6 rounded-2xl bg-primary px-8 py-12 text-primary-foreground sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-3xl font-semibold tracking-tight">See Sara book a visit.</h2>
+              <p className="mt-2 opacity-80">The demo runs on a sample clinic. Try it in English or Arabic.</p>
+            </div>
+            <Button asChild size="lg" variant="secondary">
               <Link href={DEMO}>
-                Chat with Sara <ArrowRightIcon className="size-4" />
+                Open the demo chat <ArrowRightIcon className="size-4" />
               </Link>
             </Button>
           </div>
-        </div>
+        </Container>
       </section>
 
-      <footer className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <span className="flex items-center gap-2 text-sm font-bold text-foreground">
-          <Mark className="size-5" /> Front Desk
-        </span>
-        <span>The demo uses a sample clinic and sample data.</span>
+      <footer className="border-t">
+        <Container className="flex flex-col gap-3 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <Logo className="text-xl text-foreground" />
+          <span className="flex items-center gap-3">
+            The demo uses a sample clinic and sample data.
+            <ThemeToggle />
+          </span>
+        </Container>
       </footer>
     </div>
   );

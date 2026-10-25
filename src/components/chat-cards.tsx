@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+export const SPRING = [0.34, 1.56, 0.64, 1] as const;
 
 export const dayLabel = (date: string) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
@@ -22,19 +23,19 @@ export type Slots = { service: string; days: { date: string; times: string[]; no
 export type Booked = { service: string; date: string; time: string; address: string | null; maps_url: string | null };
 export type Appt = { id: string; service: string; date: string; time: string };
 
-// Sara's text bubble: stone on white surfaces; pass bg-card when it sits on stone. The patient's bubble is the sage one.
+// Sara's line: plain text, no box, like a modern assistant reply. The patient's bubble is the sage one.
 export const Bubble = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <div className={cn("w-fit max-w-[85%] rounded-[18px] rounded-bl-md bg-background px-4 py-2.5 leading-relaxed", className)}>{children}</div>
+  <div className={cn("w-fit max-w-[85%] text-[15px] leading-relaxed", className)}>{children}</div>
 );
 
 export const PatientBubble = ({ children }: { children: ReactNode }) => (
-  <div className="ml-auto w-fit max-w-[80%] rounded-[18px] rounded-br-md bg-primary px-4 py-2.5 leading-relaxed text-primary-foreground">{children}</div>
+  <div className="ms-auto w-fit max-w-[80%] rounded-2xl rounded-ee-md bg-primary px-4 py-2.5 text-[15px] leading-relaxed text-primary-foreground">{children}</div>
 );
 
 // "Sara is typing": three dots, like a phone chat.
 export function TypingDots({ label }: { label: string }) {
   return (
-    <div role="status" aria-label={label} className="flex w-fit items-center gap-1 rounded-[18px] rounded-bl-md bg-background px-3.5 py-3">
+    <div role="status" aria-label={label} className="flex w-fit items-center gap-1 rounded-full bg-muted px-3.5 py-3">
       {[0, 1, 2].map((i) => (
         <span key={i} className="typing-dot size-1.5 rounded-full bg-muted-foreground" style={{ animationDelay: `${i * 150}ms` }} />
       ))}
@@ -49,16 +50,16 @@ export function SlotPicker({ slots, onPick, busy, picked: pickedProp }: { slots:
   const reduce = useReducedMotion();
   let n = 0;
   return (
-    <Card className="w-full max-w-sm gap-3 rounded-2xl py-4 shadow-none">
-      <CardHeader className="px-4">
-        <CardTitle className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+    <Card className="w-full max-w-sm gap-3 rounded-xl py-4 shadow-none">
+      <CardHeader className="border-b px-4 !pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <ClockIcon className="size-3.5" /> Free times · {slots.service}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 px-4">
         {slots.days.map((d) => (
           <div key={d.date} className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold">{dayLabel(d.date)}</span>
+            <span className="text-xs font-medium text-muted-foreground">{dayLabel(d.date)}</span>
             {d.times.length ? (
               <div className="grid grid-cols-3 gap-2">
                 {d.times.map((t) => {
@@ -76,8 +77,8 @@ export function SlotPicker({ slots, onPick, busy, picked: pickedProp }: { slots:
                         variant="outline"
                         disabled={busy || !!picked}
                         className={cn(
-                          "w-full rounded-xl font-mono text-[13px] font-normal tabular-nums shadow-none hover:border-primary hover:bg-accent",
-                          isPicked && "border-foreground bg-foreground text-background disabled:opacity-100",
+                          "h-11 w-full rounded-lg bg-card text-[13px] font-medium tabular-nums shadow-none hover:border-primary hover:bg-accent sm:h-9",
+                          isPicked && "border-primary bg-primary text-primary-foreground disabled:opacity-100",
                         )}
                         onClick={() => {
                           setPicked(key);
@@ -106,14 +107,14 @@ export function BookedCard({ booked: b }: { booked: Booked }) {
   const reduce = useReducedMotion();
   return (
     <motion.div
-      initial={reduce ? false : { opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.24, ease: EASE_OUT }}
-      className="w-full max-w-sm origin-bottom-left"
+      initial={reduce ? false : { opacity: 0, y: 8, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.3, ease: EASE_OUT }}
+      className="w-full max-w-sm origin-top-left"
     >
-      <Card className="gap-3 rounded-2xl py-4 shadow-[0_12px_30px_-18px_rgb(28_25_23/0.35)]">
-        <CardHeader className="px-4">
-          <CardTitle className="flex items-center gap-2 text-sm">
+      <Card className="gap-3 rounded-xl py-4 shadow-none">
+        <CardHeader className="border-b px-4 !pb-3">
+          <CardTitle className="flex items-center gap-2 text-[15px] font-semibold">
             <span className="flex size-5 items-center justify-center rounded-full bg-success text-success-foreground">
               <svg viewBox="0 0 24 24" className="size-3" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <motion.path
@@ -129,7 +130,7 @@ export function BookedCard({ booked: b }: { booked: Booked }) {
         </CardHeader>
         <CardContent className="flex flex-col gap-2 px-4 text-sm">
           <div className="font-medium">{b.service}</div>
-          <div className="flex items-center gap-1.5 font-mono text-[13px] tabular-nums">
+          <div className="flex items-center gap-1.5 tabular-nums">
             <CalendarCheckIcon className="size-3.5 text-muted-foreground" />
             {dayLabel(b.date)} at {timeLabel(b.time)}
           </div>
@@ -146,12 +147,12 @@ export function BookedCard({ booked: b }: { booked: Booked }) {
 
 export function AppointmentList({ appts }: { appts: Appt[] }) {
   return (
-    <Card className="w-full max-w-sm gap-2 rounded-2xl py-4 shadow-none">
-      <CardContent className="flex flex-col gap-2 px-4 text-sm">
+    <Card className="w-full max-w-sm gap-2 rounded-xl py-3 shadow-none">
+      <CardContent className="flex flex-col divide-y px-4 text-sm">
         {appts.map((a) => (
-          <div key={a.id} className="flex items-center justify-between gap-2">
+          <div key={a.id} className="flex items-center justify-between gap-2 py-2">
             <span>{a.service}</span>
-            <Badge variant="secondary" className="font-mono font-normal tabular-nums">
+            <Badge variant="secondary" className="font-normal tabular-nums">
               {dayLabel(a.date)}, {timeLabel(a.time)}
             </Badge>
           </div>

@@ -90,7 +90,7 @@ export function reminderText(r: { name: string | null; service: string; startsAt
 }
 
 // In the chat history, so the agent understands the patient's reply to an outbound message.
-async function appendToChat(patientId: string, text: string) {
+export async function appendToChat(patientId: string, text: string) {
   const sb = db();
   const { data } = await sb.from("conversations").select("history").eq("patient_id", patientId).maybeSingle();
   const history = (data?.history ?? []) as AgentInputItem[];

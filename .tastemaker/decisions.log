@@ -2,3 +2,4 @@
 2026-10-25 kept surface=landing axis=typography choice=Instrument Serif display with italic clay phrase reason=Anas chose keep over all-sans (resolves pending-review above)
 2026-10-25 pending-review surface=landing+chat axis=direction choice=clean clinical all-sans, options A Clinic White / B Deep Green / C Stone & Sage in design-options/ reason=Anas asked to replace warm serif lock; awaiting pick
 2026-10-25 kept surface=landing+chat axis=direction choice=option C Stone & Sage v2 (tinted stone bg, sage+sand washes, dot grid; Manrope + Readex Pro) reason=Anas picked C, asked for a less plain, lightly coloured background (resolves pending-review above; supersedes the serif lock)
+2026-10-25 kept surface=all axis=direction choice=The Ledger (paper, ink, sage/blue/red, Newsreader+Onest+Plex Mono, light+dark) reason=Anas chose Ledger for the whole app (supersedes Stone & Sage v2)

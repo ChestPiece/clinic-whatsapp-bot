@@ -41,7 +41,6 @@ async function ClinicChat({ params }: { params: PageProps<"/chat/[slug]">["param
 export default function ChatPage({ params }: PageProps<"/chat/[slug]">) {
   return (
     <main className="relative h-dvh overflow-hidden">
-      <div aria-hidden className="wash wash-soft" />
       <Suspense fallback={<div className="relative h-full animate-pulse" />}>
         <ClinicChat params={params} />
       </Suspense>

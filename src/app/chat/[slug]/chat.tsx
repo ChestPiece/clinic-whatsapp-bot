@@ -1,8 +1,10 @@
 "use client";
 
+import { Logo } from "@/components/logo";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type DynamicToolUIPart } from "ai";
-import { ArrowUpIcon, MapPinIcon, PhoneIcon } from "lucide-react";
+import { DefaultChatTransport, type DynamicToolUIPart, type UIMessage } from "ai";
+import { ArrowLeftIcon, ArrowUpIcon, ChevronDownIcon, MapPinIcon, PanelLeftIcon, PhoneIcon, PlusIcon, RotateCcwIcon } from "lucide-react";
+import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { AppointmentList, BookedCard, Bubble, EASE_OUT, SlotPicker, TypingDots, type Appt, type Booked, type Slots } from "@/components/chat-cards";
@@ -14,6 +16,9 @@ import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { Badge } from "@/components/ui/badge";
 import { InputGroupAddon } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/ledger";
+import { cn } from "@/lib/utils";
 import type { Service } from "@/lib/clinics";
 import { DAYS, type Hours } from "@/lib/slots";
 
@@ -37,7 +42,11 @@ const WEEK = [DAYS[6], ...DAYS.slice(0, 6)]; // UAE week starts on Saturday
 
 // Groups neighbouring days with the same hours: "Sat–Thu 09:00–21:00", "Fri Closed".
 function hourRows(hours: Hours) {
-  const rows: { from: (typeof DAYS)[number]; to: (typeof DAYS)[number]; time: string }[] = [];
+  const rows: {
+    from: (typeof DAYS)[number];
+    to: (typeof DAYS)[number];
+    time: string;
+  }[] = [];
   for (const d of WEEK) {
     const time = hours[d]?.map(([a, b]) => `${a}–${b}`).join(", ") || "Closed";
     const prev = rows.at(-1);
@@ -50,58 +59,138 @@ function hourRows(hours: Hours) {
   }));
 }
 
-const label = "font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground";
+// One collapsible block in the sidebar: native <details>, so it needs no JS state.
+function InfoBlock({ title, children, open }: { title: string; children: ReactNode; open?: boolean }) {
+  return (
+    <details open={open} className="group border-b py-1 last:border-b-0">
+      <summary className="flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-2 text-sm font-medium hover:bg-sidebar-accent [&::-webkit-details-marker]:hidden">
+        {title}
+        <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="px-2 pb-3 pt-1 text-sm">{children}</div>
+    </details>
+  );
+}
 
+// Hours, services and address, as collapsible blocks in the sidebar.
 function ClinicInfo({ info, phone }: { info: Info; phone: string | null }) {
   return (
-    <aside className="hidden w-80 shrink-0 flex-col gap-3 overflow-y-auto py-4 pe-4 lg:flex">
-      <section className="rounded-[22px] bg-card p-5">
-        <h2 className={label}>Hours</h2>
-        <dl className="mt-3 flex flex-col gap-1.5 text-sm">
+    <div className="flex flex-col">
+      <InfoBlock title="Opening hours" open>
+        <dl className="flex flex-col gap-1.5">
           {hourRows(info.hours).map((r) => (
             <div key={r.days} className="flex justify-between gap-4">
               <dt className="text-muted-foreground">{r.days}</dt>
-              <dd className="font-mono text-[13px] tabular-nums">{r.time}</dd>
+              <dd className="text-end tabular-nums">{r.time}</dd>
             </div>
           ))}
         </dl>
-      </section>
+      </InfoBlock>
       {info.services.length > 0 && (
-        <section className="rounded-[22px] bg-card p-5">
-          <h2 className={label}>Services</h2>
-          <dl className="mt-3 flex flex-col gap-1.5 text-sm">
+        <InfoBlock title="Services & prices">
+          <dl className="flex flex-col gap-1.5">
             {info.services.map((s) => (
               <div key={s.name} className="flex justify-between gap-4">
                 <dt>{s.name}</dt>
-                <dd className="shrink-0 font-mono text-[13px] tabular-nums text-muted-foreground">AED {s.price_aed.toLocaleString("en")}</dd>
+                <dd className="shrink-0 tabular-nums text-muted-foreground">AED {s.price_aed.toLocaleString("en")}</dd>
               </div>
             ))}
           </dl>
-        </section>
+        </InfoBlock>
       )}
       {(info.address || phone) && (
-        <section className="rounded-[22px] bg-card p-5 text-sm">
-          <h2 className={label}>Find us</h2>
-          {info.address && <p className="mt-3">{info.address}</p>}
+        <InfoBlock title="Location & contact">
+          {info.address && <p className="text-muted-foreground">{info.address}</p>}
           <div className="mt-3 flex flex-wrap gap-2">
             {info.maps_url?.startsWith("https://") && (
-              <Button asChild size="sm" variant="outline" className="rounded-full">
+              <Button asChild size="sm" variant="outline">
                 <a href={info.maps_url} target="_blank" rel="noreferrer">
-                  <MapPinIcon className="size-4" /> Maps
+                  <MapPinIcon className="size-4" /> Open in Maps
                 </a>
               </Button>
             )}
             {phone && (
-              <Button asChild size="sm" variant="outline" className="rounded-full">
+              <Button asChild size="sm" variant="outline">
                 <a href={`tel:${phone}`}>
                   <PhoneIcon className="size-4" /> {phone}
                 </a>
               </Button>
             )}
           </div>
-        </section>
+        </InfoBlock>
       )}
-    </aside>
+    </div>
+  );
+}
+
+// Clinic avatar: the logo when set, else the persona's initial.
+function Avatar({ logo, name, letter, className }: { logo?: string; name: string; letter: string; className?: string }) {
+  return logo ? (
+    // eslint-disable-next-line @next/next/no-img-element -- clinic logos live on arbitrary hosts
+    <img src={logo} alt={name} width={36} height={36} className={cn("size-9 shrink-0 rounded-full object-cover", className)} />
+  ) : (
+    <div aria-hidden className={cn("flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground", className)}>
+      {letter}
+    </div>
+  );
+}
+
+// New chat: forget this browser's visitor id, so the server starts a fresh conversation.
+function newChat() {
+  try {
+    localStorage.removeItem("visitor-id");
+  } catch {}
+  location.reload();
+}
+
+type SideProps = {
+  name: string;
+  sample: boolean;
+  logo?: string;
+  persona: string;
+  info: Info;
+  phone: string | null;
+};
+
+// Sidebar body: way back to the site, new chat, then the clinic's details.
+function SidebarBody({ name, sample, logo, persona, info, phone }: SideProps) {
+  return (
+    <div className="flex h-full flex-col">
+      <Link href="/" className="px-5 pt-4 pb-1" aria-label="Front Desk home">
+        <Logo className="text-xl" />
+      </Link>
+      <div className="flex flex-col gap-1 p-3">
+        <Button asChild variant="ghost" className="justify-start text-muted-foreground">
+          <Link href="/">
+            <ArrowLeftIcon className="size-4" /> Back to site
+          </Link>
+        </Button>
+        <Button variant="outline" className="justify-start bg-card" onClick={newChat}>
+          <PlusIcon className="size-4" /> New chat
+        </Button>
+      </div>
+      <div className="flex items-center gap-3 border-y px-4 py-4">
+        <Avatar logo={logo} name={name} letter={persona[0]} />
+        <div className="min-w-0 leading-tight">
+          <div className="flex items-center gap-2 font-medium">
+            <span className="truncate">{name}</span>
+            {sample && (
+              <Badge variant="secondary" className="text-[10px] font-medium uppercase tracking-wide">
+                Sample
+              </Badge>
+            )}
+          </div>
+          <div className="mt-0.5 text-xs text-muted-foreground">Dental clinic</div>
+        </div>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+        <ClinicInfo info={info} phone={phone} />
+      </div>
+      <div className="flex items-center justify-between border-t px-4 py-3 text-xs text-muted-foreground">
+        Theme
+        <ThemeToggle />
+      </div>
+    </div>
   );
 }
 
@@ -151,13 +240,35 @@ function Enter({ children }: { children: ReactNode }) {
   );
 }
 
-export function Chat({ slug, clinicName, persona, phone, logo, info }: { slug: string; clinicName: string; persona: string; phone: string | null; logo?: string; info: Info }) {
+type ChatProps = {
+  slug: string;
+  clinicName: string;
+  persona: string;
+  phone: string | null;
+  logo?: string;
+  info: Info;
+};
+
+// After a reload, bring back the visitor's earlier messages (text only), then start the chat with them.
+export function Chat(props: ChatProps) {
+  const [id] = useState(visitorId);
+  const [initial, setInitial] = useState<UIMessage[] | null>(null);
+  useEffect(() => {
+    fetch(`/api/chat?slug=${encodeURIComponent(props.slug)}&visitorId=${id}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => [])
+      .then(setInitial);
+  }, [props.slug, id]);
+  return initial ? <ChatView {...props} id={id} initial={initial} /> : null;
+}
+
+function ChatView({ slug, clinicName, persona, phone, logo, info, id, initial }: ChatProps & { id: string; initial: UIMessage[] }) {
   const sample = /\(sample data\)/i.test(clinicName);
   const name = clinicName.replace(/\s*\(sample data\)/i, "");
-  const [id] = useState(visitorId);
-  const [greeted, setGreeted] = useState(false);
+  const [greeted, setGreeted] = useState(initial.length > 0);
   const reduce = useReducedMotion();
-  const { messages, sendMessage, status, stop } = useChat({
+  const { messages, sendMessage, regenerate, error, clearError, status, stop } = useChat({
+    messages: initial,
     transport: new DefaultChatTransport({
       api: "/api/chat",
       prepareSendMessagesRequest: ({ messages }) => ({
@@ -174,52 +285,70 @@ export function Chat({ slug, clinicName, persona, phone, logo, info }: { slug: s
     return () => clearTimeout(t);
   }, [reduce]);
 
+  const [sidebar, setSidebar] = useState(true);
+  const [sheet, setSheet] = useState(false);
+  const side = <SidebarBody name={name} sample={sample} logo={logo} persona={persona} info={info} phone={phone} />;
+  const empty = messages.length === 0;
+
   return (
-    <div className="relative flex h-full flex-col">
-      <header className="flex items-center justify-between gap-3 border-b bg-card/80 px-4 py-3 backdrop-blur sm:px-6">
-        <div className="flex items-center gap-3">
-          {logo ? (
-            // eslint-disable-next-line @next/next/no-img-element -- clinic logos live on arbitrary hosts
-            <img src={logo} alt={name} width={36} height={36} className="size-9 rounded-full object-cover" />
-          ) : (
-            <div aria-hidden className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-              {persona[0]}
-            </div>
-          )}
-          <div className="leading-tight">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              {name}
-              {sample && (
-                <Badge variant="secondary" className="rounded-full font-mono text-[10px] font-medium uppercase tracking-wider">
-                  Sample
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="relative flex size-1.5">
-                <span className="online-ring absolute inset-0 rounded-full bg-success" />
-                <span className="relative size-1.5 rounded-full bg-success" />
-              </span>
-              {persona}, virtual receptionist
+    <div className="flex h-full">
+      {/* Desktop: collapsible column. Phones: the same content in a left sheet. */}
+      <aside className={cn("hidden shrink-0 overflow-hidden bg-sidebar transition-[width] duration-200 ease-out lg:block", sidebar ? "w-72 border-e" : "w-0")}>
+        <div className="h-full w-72">{side}</div>
+      </aside>
+      <Sheet open={sheet} onOpenChange={setSheet}>
+        <SheetContent side="left" className="w-72 gap-0 bg-sidebar p-0">
+          <SheetTitle className="sr-only">{name}</SheetTitle>
+          {side}
+        </SheetContent>
+      </Sheet>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b px-3 sm:px-4">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <Button
+              size="icon"
+              variant="ghost"
+              aria-label="Toggle sidebar"
+              onClick={() => (window.matchMedia("(min-width: 1024px)").matches ? setSidebar((v) => !v) : setSheet(true))}
+            >
+              <PanelLeftIcon className="size-4" />
+            </Button>
+            <Avatar logo={logo} name={name} letter={persona[0]} className="size-8" />
+            <div className="min-w-0 leading-tight">
+              <div className="truncate text-sm font-medium">{name}</div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="relative flex size-1.5">
+                  <span className="online-ring absolute inset-0 rounded-full bg-success" />
+                  <span className="relative size-1.5 rounded-full bg-success" />
+                </span>
+                {persona} · online
+              </div>
             </div>
           </div>
-        </div>
-        {phone && (
-          <Button asChild size="sm" variant="outline" className="rounded-full">
-            <a href={`tel:${phone}`} aria-label="Call the clinic">
-              <PhoneIcon className="size-4" /> <span className="hidden sm:inline">Call</span>
-            </a>
-          </Button>
-        )}
-      </header>
+          {phone && (
+            <Button asChild size="sm" variant="outline">
+              <a href={`tel:${phone}`} aria-label="Call the clinic">
+                <PhoneIcon className="size-4" /> <span className="hidden sm:inline">Call clinic</span>
+              </a>
+            </Button>
+          )}
+        </header>
 
-      <div className="flex min-h-0 flex-1">
-        <div className="flex min-w-0 flex-1 flex-col bg-card lg:m-4 lg:overflow-hidden lg:rounded-[22px] lg:shadow-[0_24px_60px_-36px_rgb(28_25_23/0.35)]">
-          <Conversation className="flex-1">
-            <ConversationContent className="mx-auto w-full max-w-2xl gap-4 px-4 py-6">
-              <AnimatePresence mode="wait" initial={false}>
-                {greeted ? (
-                  <Enter key="greeting">
+        <Conversation className="flex-1">
+          <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 py-8">
+            <AnimatePresence mode="wait" initial={false}>
+              {greeted ? (
+                <Enter key="greeting">
+                  {empty ? (
+                    <div className="flex flex-col items-center pt-[10vh] text-center">
+                      <Avatar logo={logo} name={name} letter={persona[0]} className="size-12 text-base" />
+                      <h1 className="mt-4 text-2xl font-semibold tracking-tight">Hi, I&apos;m {persona}</h1>
+                      <p className="mt-2 max-w-sm text-sm text-pretty text-muted-foreground">
+                        The virtual receptionist at {name}. I can book, move or cancel a visit, and answer questions about prices, hours and location.
+                      </p>
+                    </div>
+                  ) : (
                     <Message from="assistant">
                       <MessageContent>
                         <Bubble>
@@ -227,79 +356,99 @@ export function Chat({ slug, clinicName, persona, phone, logo, info }: { slug: s
                         </Bubble>
                       </MessageContent>
                     </Message>
-                  </Enter>
-                ) : (
-                  <motion.div key="typing" exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
-                    <TypingDots label={`${persona} is typing`} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {messages.map((m) => (
-                <Enter key={m.id}>
-                  <Message from={m.role}>
-                    <MessageContent
-                      dir="auto"
-                      className="group-[.is-user]:rounded-[18px] group-[.is-user]:rounded-br-md group-[.is-user]:bg-primary group-[.is-user]:py-2.5 group-[.is-user]:text-primary-foreground"
-                    >
-                      {m.parts.map((p, i) =>
-                        p.type === "text" ? (
-                          m.role === "user" ? (
-                            <MessageResponse key={i}>{p.text}</MessageResponse>
-                          ) : (
-                            <Bubble key={i}>
-                              <MessageResponse>{p.text}</MessageResponse>
-                            </Bubble>
-                          )
-                        ) : p.type === "dynamic-tool" ? (
-                          <ToolCard key={i} part={p} onPick={send} busy={busy} />
-                        ) : null,
-                      )}
-                    </MessageContent>
-                  </Message>
+                  )}
                 </Enter>
-              ))}
-              {status === "submitted" && (
-                <Enter>
+              ) : (
+                <motion.div key="typing" exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
                   <TypingDots label={`${persona} is typing`} />
-                </Enter>
+                </motion.div>
               )}
-            </ConversationContent>
-            <ConversationScrollButton />
-          </Conversation>
+            </AnimatePresence>
 
-          <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pb-4 pt-2">
-            {messages.length === 0 && greeted && (
-              <Suggestions>
-                {STARTERS.map((s, i) => (
-                  <motion.div
-                    key={s}
-                    initial={reduce ? false : { opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: 0.2,
-                      ease: EASE_OUT,
-                      delay: 0.15 + i * 0.04,
-                    }}
+            {messages.map((m) => (
+              <Enter key={m.id}>
+                <Message from={m.role}>
+                  <MessageContent
+                    dir="auto"
+                    className="group-[.is-user]:rounded-2xl group-[.is-user]:rounded-ee-sm group-[.is-user]:bg-primary group-[.is-user]:py-2.5 group-[.is-user]:text-primary-foreground"
                   >
-                    <Suggestion suggestion={s} onClick={send} dir="auto" />
-                  </motion.div>
-                ))}
-              </Suggestions>
+                    {m.parts.map((p, i) =>
+                      p.type === "text" ? (
+                        m.role === "user" ? (
+                          <MessageResponse key={i}>{p.text}</MessageResponse>
+                        ) : (
+                          <Bubble key={i}>
+                            <MessageResponse>{p.text}</MessageResponse>
+                          </Bubble>
+                        )
+                      ) : p.type === "dynamic-tool" ? (
+                        <ToolCard key={i} part={p} onPick={send} busy={busy} />
+                      ) : null,
+                    )}
+                  </MessageContent>
+                </Message>
+              </Enter>
+            ))}
+            {error && (
+              <Enter>
+                <div role="alert" className="flex w-fit max-w-[85%] flex-col gap-2 rounded-md border border-dashed border-alert px-4 py-3 text-sm">
+                  <span className="font-mono text-[12px] text-alert">That message didn&apos;t go through.</span>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" className="rounded-full" onClick={() => (clearError(), void regenerate())}>
+                      <RotateCcwIcon className="size-3.5" /> Try again
+                    </Button>
+                    {phone && (
+                      <Button asChild size="sm" variant="ghost" className="rounded-full">
+                        <a href={`tel:${phone}`}>Call {phone}</a>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </Enter>
             )}
-            <PromptInput onSubmit={({ text }) => void send(text)} className="[&_[data-slot=input-group]]:rounded-3xl [&_[data-slot=input-group]]:bg-background">
-              <PromptInputBody>
-                <PromptInputTextarea dir="auto" placeholder={`Message ${persona}…`} rows={1} className="min-h-0 py-3 ps-4" />
-              </PromptInputBody>
-              <InputGroupAddon align="inline-end">
-                <PromptInputSubmit status={status} onStop={stop} className="rounded-full bg-foreground text-background hover:bg-foreground/90">
-                  {status === "ready" ? <ArrowUpIcon className="size-4" /> : undefined}
-                </PromptInputSubmit>
-              </InputGroupAddon>
-            </PromptInput>
-          </div>
+            {status === "submitted" && (
+              <Enter>
+                <TypingDots label={`${persona} is typing`} />
+              </Enter>
+            )}
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
+
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 px-4 pb-3 pt-2">
+          {empty && greeted && (
+            <Suggestions className="justify-center">
+              {STARTERS.map((s, i) => (
+                <motion.div
+                  key={s}
+                  initial={reduce ? false : { opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.2,
+                    ease: EASE_OUT,
+                    delay: 0.15 + i * 0.04,
+                  }}
+                >
+                  <Suggestion suggestion={s} onClick={send} dir="auto" />
+                </motion.div>
+              ))}
+            </Suggestions>
+          )}
+          <PromptInput
+            onSubmit={({ text }) => void send(text)}
+            className="[&_[data-slot=input-group]]:rounded-2xl [&_[data-slot=input-group]]:bg-card [&_[data-slot=input-group]]:shadow-sm"
+          >
+            <PromptInputBody>
+              <PromptInputTextarea dir="auto" placeholder={`Message ${persona}…`} rows={1} className="min-h-0 py-3.5 ps-4" />
+            </PromptInputBody>
+            <InputGroupAddon align="inline-end">
+              <PromptInputSubmit status={status} onStop={stop} className="rounded-full">
+                {status === "ready" ? <ArrowUpIcon className="size-4" /> : undefined}
+              </PromptInputSubmit>
+            </InputGroupAddon>
+          </PromptInput>
+          <p className="text-center text-[11px] text-muted-foreground">{persona} is a virtual assistant. In an emergency, call 998.</p>
         </div>
-        <ClinicInfo info={info} phone={phone} />
       </div>
     </div>
   );

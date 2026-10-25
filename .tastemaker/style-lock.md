@@ -1,44 +1,47 @@
-# Style lock: Front Desk (platform brand)
+# Style lock: Front Desk, clean SaaS
 
-Locked 2026-10-25 (Stone & Sage v2, supersedes the warm paper + serif lock from the same morning). Reuse these tokens for every new screen (dashboard P2, settings P3, admin). Change only when Anas asks for a new direction.
+Locked 2026-10-25 (supersedes "The Ledger"). Applies to every surface: landing, patient chat, dashboard, login. Change only when Anas asks.
 
 ## Direction contract
-- Thesis: clean clinical, calm hospitality. Tinted stone page, white surfaces, one sage accent, soft sage and sand washes so the page is never pure white.
-- Picked from three mockups (A Clinic White, B Deep Green, C Stone & Sage). Anas chose C and asked for a little colour in the background.
-- Mode: light only for now. The shadcn `.dark` block is untouched and not designed.
+- Calm, credible product for clinic owners. Neutral stone surfaces, one sage accent, plain sans type. The AI stays quiet: no sparkle icons, no gradients, no "AI" cues.
+- Light and dark. System default plus a toggle (next-themes, `.dark` class).
+
+## Logo
+- The logo is the wordmark `Front Desk.`: Newsreader 400, tracking -0.02em, ink colour, with the full stop in `--alert` red.
+- Use `<Logo />` from `src/components/logo.tsx` (it applies the `.wordmark` utility). Never retype it by hand.
+- No icon mark, no box behind it, no other colour. Size it with a text class only (`text-2xl` header, `text-xl` footer, sidebar, dashboard).
+- Newsreader is for the wordmark only. Never use it for headings or UI text.
 
 ## Color contract (tokens in `src/app/globals.css`)
-| Role | Token | Hex |
-|---|---|---|
-| Stone (page bg, Sara bubble) | `--background` | #F4F3EE |
-| Surface (cards, chat column) | `--card` | #FFFFFF |
-| Panel (soft blocks, secondary) | `--panel`, `--secondary` | #EAE8E1 |
-| Ink (text, CTA band, send button) | `--foreground` | #1C1917 |
-| Muted text | `--muted-foreground` | #57534E |
-| Sage (primary, patient bubble, CTA) | `--primary` | #4F6F5C |
-| Sage soft (chips, badges) | `--accent` | #E8EFEA |
-| Sage deep (text on sage soft) | `--accent-foreground` | #3E5A49 |
-| Sand (wash only) | `--sand` | #E9C9A8 |
-| Border | `--border` | #E7E5E4 |
+| Role | Token | Light | Dark |
+|---|---|---|---|
+| Page | `--background` | #fafaf9 | #0c0a09 |
+| Card | `--card` | #ffffff | #171412 |
+| Ink | `--foreground` | #0c0a09 | #f5f5f4 |
+| Muted text | `--muted-foreground` | #6b6560 | #a8a29e |
+| Border | `--border` | #e7e5e4 | #292524 |
+| Sage: primary, WhatsApp, user bubbles | `--primary` | #4f6f5c | #93b59d |
+| Blue: website channel | `--web` | #33506e | #93aecb |
+| Red: needs staff, logo dot | `--alert` | #ad4320 | #e8825f |
 
-Checked with `tastemaker/scripts/check_contrast.py`:
-- Text-safe (>= 4.5): ink on stone ~16.7, muted on stone 6.87, muted on panel 6.22, sage on stone 5.03, white on sage 5.58.
-- Sand is decorative only, never text or a state signal.
-- Clinic white-label accent (`clinic.branding.accent`) replaces `--primary` inside the chat only. Not contrast-checked yet; P3 settings must check it against white before saving.
+- Sage is the only accent on marketing surfaces. Blue and red carry meaning (channel, needs staff) and appear in the dashboard and the logo dot only.
+- No hard-coded hex in components. Add a token first.
 
-## Type
-- All sans. Manrope for Latin (headlines 800, tracking -0.03 to -0.04em), Readex Pro for Arabic, IBM Plex Mono for times, prices and small labels.
-- Stack order: Manrope first, Readex second. `--font-sans` names the real families, not the next/font variables, because next/font always adds an Arial "Manrope Fallback" face with no unicode-range that would catch Arabic.
-- Labels: mono 11px uppercase, tracking 0.08em, muted.
+## Type contract
+- Geist for all UI and headings. Headings semibold, tracking -0.02em to -0.03em at display sizes.
+- Geist Mono only for times, prices and IDs, sparingly.
+- Readex Pro is the Arabic fallback in the sans stack. Use `dir="auto"` on user text.
+- No italics for emphasis, no uppercase micro-labels, no serif headings.
 
-## Shape
-- Bubbles `rounded-[18px]` with one small corner (`rounded-bl-md` Sara, `rounded-br-md` patient). Cards `rounded-2xl` or `rounded-[22px]`. Big blocks `rounded-[36px]`. Buttons and inputs are pills.
-- Shadows only soft and low: `0 20px 40px -24px rgb(28 25 23 / 0.3)`.
+## Shape and space
+- Radius 0.75rem (`--radius`); cards `rounded-xl`, composer and hero mock `rounded-2xl`, pills `rounded-full`.
+- Borders over shadows. At most `shadow-sm` (floating navbar, composer).
+- Content width `max-w-6xl` (landing), `max-w-3xl` (chat column). Section rhythm `py-20`, side gutter `px-4 sm:px-6`.
 
-## Background
-- `.wash`: blurred sage circle top-left and sand circle right. `.wash-soft` for quieter pages (chat, dark CTA).
-- `.dots`: 22px dot grid with a radial mask, hero only.
+## Patterns
+- Landing: floating rounded navbar (logo, links, Sign in, Try the demo), hero with chat replay, features, how it works, safety, sage CTA band, footer with logo + theme toggle.
+- Chat: left collapsible sidebar (logo, Back to site, New chat, clinic card, `<details>` info blocks, theme toggle); a left sheet on phones. Assistant replies are plain text, patient replies are sage bubbles.
+- Motion: short fades and small rises (150-250 ms, ease-out); respect reduced motion. No bouncy springs.
 
-## Motion
-- Enter 200-240ms ease-out (`EASE_OUT`), reveals 400ms with `amount: 0.2`. `.drift` 6s float on the hero product only.
-- Every animation respects reduced motion.
+## Banned
+Paper/dot textures, torn edges, gradient blobs, glassmorphism beyond the navbar blur, emoji in UI, icon-in-a-square logos, invented stats or client logos.
