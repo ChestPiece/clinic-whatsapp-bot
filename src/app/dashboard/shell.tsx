@@ -17,7 +17,7 @@ const NAV = [
 export function Nav({ needsStaff }: { needsStaff: number }) {
   const path = usePathname();
   return (
-    <nav aria-label="Dashboard" className="flex gap-1 overflow-x-auto md:flex-col">
+    <nav aria-label="Dashboard" className="-mx-1 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none] md:flex-col">
       {NAV.map(({ href, label, icon: Icon }) => {
         const active = href === "/dashboard" ? path === href : path.startsWith(href);
         return (

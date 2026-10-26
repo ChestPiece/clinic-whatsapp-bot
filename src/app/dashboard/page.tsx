@@ -36,8 +36,8 @@ export default async function Today() {
   return (
     <>
       <section className="grid gap-4 border-b py-8 lg:grid-cols-[1fr_auto] lg:items-end">
-        <h1 className="font-serif text-[clamp(2.4rem,5vw,4rem)] leading-[0.95] tracking-[-0.035em]">
-          The book, <i className="text-alert">this week.</i>
+        <h1 className="text-3xl font-semibold tracking-[-0.03em]">
+          This week
         </h1>
         <p className="label">{clinic.name} · Week of {LONG.format(new Date(`${start}T00:00:00Z`))}</p>
       </section>
@@ -47,8 +47,8 @@ export default async function Today() {
         <Tally value={waiting.length} label="Need staff" />
       </div>
 
-      <div className="grid gap-7 py-8 xl:grid-cols-[340px_1fr]">
-        <section className="slip torn-top relative flex flex-col xl:h-[600px]">
+      <div className="grid grid-cols-1 gap-7 py-8 xl:grid-cols-[340px_1fr]">
+        <section className={`slip torn-top relative flex flex-col ${first ? "xl:h-[600px]" : "xl:self-start"}`}>
           {first ? (
             <>
               <header className="border-b border-dashed px-5 pt-5 pb-3">

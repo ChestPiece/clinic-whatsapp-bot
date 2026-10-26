@@ -14,7 +14,7 @@ export type Kind = "wa" | "web" | "staff";
 export type Block = { id: string; day: number; start: number; end: number; title: string; name: string; kind: Kind; href?: string; muted?: boolean };
 export type Day = { label: string; date: number; today?: boolean };
 
-const ROW = 52;
+export const ROW = 52;
 const KIND = {
   wa: "bg-sage-soft border-primary",
   web: "bg-web-soft border-web",
@@ -22,7 +22,8 @@ const KIND = {
 } as const;
 
 // Week grid: one column per day, 52px per hour. Blocks drop in like cards pinned to a board.
-export function WeekCalendar({ title, days, blocks, from = 9, to = 20, now, aside }: { title: ReactNode; days: Day[]; blocks: Block[]; from?: number; to?: number; now?: { day: number; hour: number }; aside?: ReactNode }) {
+// `extra(day)` renders more content inside a day column (the landing story's flying booking).
+export function WeekCalendar({ title, days, blocks, from = 9, to = 20, now, aside, extra }: { title: ReactNode; days: Day[]; blocks: Block[]; from?: number; to?: number; now?: { day: number; hour: number }; aside?: ReactNode; extra?: (day: number) => ReactNode }) {
   const reduce = useReducedMotion();
   const hours = Array.from({ length: to - from }, (_, i) => from + i);
   // Mobile shows three days from today (or the first day).
@@ -39,7 +40,7 @@ export function WeekCalendar({ title, days, blocks, from = 9, to = 20, now, asid
           {aside}
         </div>
       </header>
-      <div className="relative grid" style={{ gridTemplateColumns: `52px repeat(${days.length}, minmax(0, 1fr))` }}>
+      <div className="relative grid grid-cols-[52px_repeat(var(--m),minmax(0,1fr))] md:grid-cols-[52px_repeat(var(--n),minmax(0,1fr))]" style={{ "--n": days.length, "--m": Math.min(3, days.length) } as React.CSSProperties}>
         <div className="border-b" />
         {days.map((d, i) => (
           <div key={i} className={cn("border-b border-s border-s-rule px-2 py-2.5 text-xs font-medium", hide(i))}>
@@ -79,6 +80,7 @@ export function WeekCalendar({ title, days, blocks, from = 9, to = 20, now, asid
                   </motion.div>
                 );
               })}
+            {extra?.(i)}
           </div>
         ))}
         {now && now.hour >= from && now.hour < to && (
@@ -168,7 +170,7 @@ export function Line({ who, role, children }: { who: string; role: "patient" | "
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, ease: EASE_OUT }}
     >
-      <span className={cn("pt-0.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.06em] text-muted-foreground", role === "assistant" && "text-primary", role === "staff" && "text-web")}>{who}</span>
+      <span className={cn("pt-0.5 text-xs font-medium text-muted-foreground", role === "assistant" && "text-primary", role === "staff" && "text-web")}>{who}</span>
       <span
         dir="auto"
         className={cn(

@@ -28,14 +28,14 @@ export default async function Patient({ params }: PageProps<"/dashboard/patients
     <>
       <header className="border-b py-8">
         <Link href="/dashboard/patients" className="label hover:text-foreground">← Patients</Link>
-        <h1 className="mt-2 font-serif text-4xl tracking-tight">{who(p)}</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">{who(p)}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {p.wa_id ? `WhatsApp +${p.wa_id.replace(/@.*/, "")}` : "Website chat"}
           {p.opted_out && " · opted out of follow-ups (sent STOP)"}
         </p>
       </header>
 
-      <div className="grid gap-6 py-6 lg:grid-cols-[360px_1fr]">
+      <div className="grid grid-cols-1 gap-6 py-6 lg:grid-cols-[360px_1fr]">
         <div className="grid content-start gap-6">
           <form action={savePatient.bind(null, p.id)} className="slip grid gap-3 p-5">
             <h2 className="font-serif text-xl">Details</h2>

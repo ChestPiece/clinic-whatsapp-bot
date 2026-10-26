@@ -43,14 +43,14 @@ export default async function Inbox({ searchParams }: PageProps<"/dashboard/inbo
   return (
     <>
       <header className="flex flex-wrap items-end justify-between gap-4 border-b py-8">
-        <h1 className="font-serif text-4xl tracking-tight">Inbox</h1>
+        <h1 className="text-3xl font-semibold tracking-[-0.03em]">Inbox</h1>
         <div className="flex gap-1 text-sm" role="group" aria-label="Filter">
           <Link href={href({ f: undefined, p: open })} aria-current={f !== "staff" ? "true" : undefined} className={cn("rounded-full px-3 py-1.5 text-muted-foreground", f !== "staff" && "bg-foreground text-background")}>All</Link>
           <Link href={href({ f: "staff", p: undefined })} aria-current={f === "staff" ? "true" : undefined} className={cn("rounded-full px-3 py-1.5 text-muted-foreground", f === "staff" && "bg-alert text-white")}>Needs staff · {waiting.size}</Link>
         </div>
       </header>
 
-      <div className="grid gap-6 py-6 lg:grid-cols-[320px_1fr]">
+      <div className="grid grid-cols-1 gap-6 py-6 lg:grid-cols-[320px_1fr]">
         <ul className={cn("slip divide-y overflow-hidden lg:max-h-[calc(100dvh-180px)] lg:overflow-y-auto", open && p && "max-lg:hidden")}>
           {list.length === 0 && <li className="p-5 text-sm text-muted-foreground">{f === "staff" ? "Nobody is waiting for staff." : "No chats yet."}</li>}
           {list.map((id) => {
@@ -117,7 +117,7 @@ export default async function Inbox({ searchParams }: PageProps<"/dashboard/inbo
 }
 
 const Channel = ({ channel }: { channel: "whatsapp" | "web" }) => (
-  <span className={cn("rounded-[3px] px-1.5 py-px font-mono text-[10.5px] uppercase tracking-wide text-foreground", channel === "whatsapp" ? "bg-sage-soft" : "bg-web-soft")}>
+  <span className={cn("rounded-full px-2 py-px text-[11.5px] font-medium text-foreground", channel === "whatsapp" ? "bg-sage-soft" : "bg-web-soft")}>
     {channel === "whatsapp" ? "WhatsApp" : "Website"}
   </span>
 );

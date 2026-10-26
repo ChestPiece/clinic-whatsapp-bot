@@ -56,7 +56,10 @@ npm run lint
 - **Brand guidelines are locked in `.tastemaker/style-lock.md`. Read it before any UI work and follow it; change it only when Anas asks.**
 - Neutral stone palette + sage `--primary`, blue `--web`, red `--alert` (tokens in `src/app/globals.css`). Geist (UI + headings), Geist Mono (sparing), Readex Pro for Arabic. No paper texture. `.slip` now means a plain card; `.torn-top` is a no-op kept for old dashboard markup.
 - Logo: the `Front Desk.` wordmark (Newsreader, red full stop). Always use `<Logo />` from `src/components/logo.tsx`; Newsreader is loaded only for it (`.wordmark` utility).
-- Chat: left collapsible sidebar (Back to site, New chat, clinic hours/services/location in `<details>`), left sheet on phones. Landing: floating navbar, hero + chat replay, features, how it works, safety, CTA.
+- Landing (2026-10-26): hero with EN/عربي demo replay, pinned "night shift" story (`NightShift` in `src/components/landing.tsx`: chat books a visit, Flip flies it into the calendar), hairline features, safety list. GSAP only via `src/lib/gsap.ts`.
+- Chat: left collapsible sidebar (Back to site, New chat, clinic hours/services/location in `<details>`), left sheet on phones; starter questions sit under the greeting in the empty state.
+- Login: split layout, form left, static "while you were closed" sample right (desktop only).
+- Dashboard: page titles `text-3xl font-semibold`, no GSAP, no uppercase labels. Responsive grids need `grid-cols-1` as the base so wide children (calendar) cannot push past the phone width.
 - Shared pieces in `src/components/ledger.tsx`: `WeekCalendar`, `Tally`, `Typed`, `Line`, `ThemeToggle`.
 
 ## Staff dashboard (P2)

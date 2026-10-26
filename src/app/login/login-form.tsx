@@ -1,11 +1,9 @@
 "use client";
 
-import { Logo } from "@/components/logo";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 // No sign-up: staff accounts are invited from the Supabase dashboard (see 0005_dashboard.sql).
@@ -42,13 +40,10 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="slip torn-top relative w-full max-w-sm rounded-[4px]">
-      <CardHeader>
-        <CardTitle className="text-2xl font-normal"><Logo /> Staff sign in</CardTitle>
-        <CardDescription>Inbox, calendar and patients for your clinic.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={signIn} className="grid gap-4">
+    <div className="w-full max-w-sm">
+      <h1 className="text-2xl font-semibold tracking-[-0.02em]">Staff sign in</h1>
+      <p className="mt-2 text-sm text-muted-foreground">Inbox, calendar and patients for your clinic.</p>
+        <form onSubmit={signIn} className="mt-8 grid gap-4">
           <label className="grid gap-1.5 text-sm font-medium">
             Email
             <Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -57,11 +52,10 @@ export function LoginForm() {
             Password
             <Input type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
           </label>
-          <Button type="submit" disabled={busy} className="rounded-full bg-foreground text-background hover:bg-foreground/90">Sign in</Button>
+          <Button type="submit" disabled={busy} size="lg" className="mt-2">Sign in</Button>
           <Button type="button" variant="ghost" disabled={busy} onClick={sendLink}>Email me a sign-in link</Button>
           <p role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">{note}</p>
         </form>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

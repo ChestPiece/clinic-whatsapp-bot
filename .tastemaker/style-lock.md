@@ -41,7 +41,8 @@ Locked 2026-10-25 (supersedes "The Ledger"). Applies to every surface: landing, 
 ## Patterns
 - Landing: floating rounded navbar (logo, links, Sign in, Try the demo), hero with chat replay, features, how it works, safety, sage CTA band, footer with logo + theme toggle.
 - Chat: left collapsible sidebar (logo, Back to site, New chat, clinic card, `<details>` info blocks, theme toggle); a left sheet on phones. Assistant replies are plain text, patient replies are sage bubbles.
-- Motion: short fades and small rises (150-250 ms, ease-out); respect reduced motion. No bouncy springs.
+- Motion (relaxed 2026-10-26): UI feedback stays 150-250 ms ease-out. GSAP (`src/lib/gsap.ts`, ScrollTrigger + Flip + SplitText) is allowed on marketing pages: one pinned scroll story per page, scroll reveals, a hero line reveal; scroll-linked moves up to 900 ms, eases `power3`/`expo`, no bounce. Reduced motion: no pin, final state shown. Dashboard: no GSAP.
+- Fluid scale: `text-display`, `text-h2`, `text-lead`, `py-section` (clamp tokens in `globals.css`). Hero fits the first viewport.
 
 ## Banned
 Paper/dot textures, torn edges, gradient blobs, glassmorphism beyond the navbar blur, emoji in UI, icon-in-a-square logos, invented stats or client logos.

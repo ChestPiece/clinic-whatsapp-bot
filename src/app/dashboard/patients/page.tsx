@@ -22,7 +22,7 @@ export default async function Patients({ searchParams }: PageProps<"/dashboard/p
   return (
     <>
       <header className="flex flex-wrap items-end justify-between gap-4 border-b py-8">
-        <h1 className="font-serif text-4xl tracking-tight">Patients</h1>
+        <h1 className="text-3xl font-semibold tracking-[-0.03em]">Patients</h1>
         <form className="flex gap-2" role="search">
           {tag && <input type="hidden" name="tag" value={tag} />}
           <label htmlFor="q" className="sr-only">Search patients</label>

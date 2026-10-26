@@ -12,8 +12,7 @@ import { Conversation, ConversationContent, ConversationScrollButton } from "@/c
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { PromptInput, PromptInputBody, PromptInputSubmit, PromptInputTextarea } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { Badge } from "@/components/ui/badge";
+import { Suggestion } from "@/components/ai-elements/suggestion";
 import { InputGroupAddon } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -172,15 +171,8 @@ function SidebarBody({ name, sample, logo, persona, info, phone }: SideProps) {
       <div className="flex items-center gap-3 border-y px-4 py-4">
         <Avatar logo={logo} name={name} letter={persona[0]} />
         <div className="min-w-0 leading-tight">
-          <div className="flex items-center gap-2 font-medium">
-            <span className="truncate">{name}</span>
-            {sample && (
-              <Badge variant="secondary" className="text-[10px] font-medium uppercase tracking-wide">
-                Sample
-              </Badge>
-            )}
-          </div>
-          <div className="mt-0.5 text-xs text-muted-foreground">Dental clinic</div>
+          <div className="truncate font-medium">{name}</div>
+          <div className="mt-0.5 text-xs text-muted-foreground">{sample ? "Dental clinic · sample data" : "Dental clinic"}</div>
         </div>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
@@ -341,12 +333,19 @@ function ChatView({ slug, clinicName, persona, phone, logo, info, id, initial }:
               {greeted ? (
                 <Enter key="greeting">
                   {empty ? (
-                    <div className="flex flex-col items-center pt-[10vh] text-center">
+                    <div className="flex flex-col items-center pt-[clamp(1.5rem,16svh,9rem)] text-center">
                       <Avatar logo={logo} name={name} letter={persona[0]} className="size-12 text-base" />
                       <h1 className="mt-4 text-2xl font-semibold tracking-tight">Hi, I&apos;m {persona}</h1>
                       <p className="mt-2 max-w-sm text-sm text-pretty text-muted-foreground">
                         The virtual receptionist at {name}. I can book, move or cancel a visit, and answer questions about prices, hours and location.
                       </p>
+                      <div className="mt-8 flex max-w-2xl flex-wrap justify-center gap-2">
+                        {STARTERS.map((q, i) => (
+                          <motion.div key={q} initial={reduce ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: EASE_OUT, delay: 0.15 + i * 0.04 }}>
+                            <Suggestion suggestion={q} onClick={send} dir="auto" />
+                          </motion.div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <Message from="assistant">
@@ -416,24 +415,6 @@ function ChatView({ slug, clinicName, persona, phone, logo, info, id, initial }:
         </Conversation>
 
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 px-4 pb-3 pt-2">
-          {empty && greeted && (
-            <Suggestions className="justify-center">
-              {STARTERS.map((s, i) => (
-                <motion.div
-                  key={s}
-                  initial={reduce ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.2,
-                    ease: EASE_OUT,
-                    delay: 0.15 + i * 0.04,
-                  }}
-                >
-                  <Suggestion suggestion={s} onClick={send} dir="auto" />
-                </motion.div>
-              ))}
-            </Suggestions>
-          )}
           <PromptInput
             onSubmit={({ text }) => void send(text)}
             className="[&_[data-slot=input-group]]:rounded-2xl [&_[data-slot=input-group]]:bg-card [&_[data-slot=input-group]]:shadow-sm"
